@@ -1,0 +1,195 @@
+<html>
+  <head>
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.js"
+    integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+    crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.js"></script>
+	<script type="text/javascript" src="scripts/categorizeus.js"></script>
+	<script type="text/javascript" src="scripts/mainui.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/categorizeus.css"></script>
+	<link rel="stylesheet" type="text/css" href="css/mainui.css"></script>
+<script type="text/javascript">
+  var tmplRegister;
+  $(document).ready(function(){
+  	tmplRegister= Handlebars.compile($("#tmplRegister").html());
+  	initialize(true);
+		displayRegisterForm("#editor");
+    
+  });
+</script>
+  <!-- This is the template for the items in the main grid view-->
+	<script id="tmplBasicDocument" type="text/x-handlebars-template">
+		<div class="basicDocument categorizeus{{id}}" id="{{id}}">
+			<h1>{{title}}</h1>
+			{{#if link}}
+				<a href="{{link}}" target="_blank">
+					<img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
+				</a>
+			{{/if}}
+			<div class="postedBy">
+				posted by {{postedBy.userName}}
+				<input type="button" class="viewButton" value="view"/>
+			</div>
+			<div class="body">
+				{{body}}
+			</div>
+		</div>
+	</script>
+  
+  <!--the links to nav the grid, at the bottom of the screen -->
+	<script id="tmplNavigation" type="text/x-handlebars-template">
+		<div class="searchNavigation">
+			<span class="previousNavigation">
+				<a href="javascript:void(0);" class="previousLink">
+					<span>previous</span>
+				</a>
+			</span>
+			<span class="nextNavigation">
+				<a href="javascript:void(0);" class="nextLink">
+					<span>next</span>
+				</a>
+			</span>
+		</div>
+	</script>
+  <!--A comment, not including the original post -->
+	<script id="tmplIndividualComment" type="text/x-handlebars-template"><!--figure out partials here to avoid dupes-->
+		<div class="comment categorizeus{{id}}">
+			<div class="avatar">
+				<a href="javascript:void(0);"><img src="images/sillohuette.png"
+					width="55" height="55" alt="{{postedBy.userName}} avatar"></a>
+			</div>
+			<div class="comment-content">
+				<header>
+					<span class="title">{{title}}</span>
+					<a href="javascript:void(0);" class="userlink">{{postedBy.userName}}</a> - <span
+						class="pubdate">posted TODO time units ago</span>
+					<input type="button" class="replyButton" value="reply"/>
+				</header>
+				{{#if link}}
+					<a href="{{link}}" target="_blank">
+				    <img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
+					</a>
+				{{/if}}
+				<p>
+					{{body}}
+				</p>
+			</div>
+			<ul class="replies categorizeus{{id}}">
+			</ul>
+		</div>
+	</script>
+  
+  <!--A comment, including the original post, any changes made here must also be made above -->
+	<script id="tmplFullMessage" type="text/x-handlebars-template"><!--figure out partials here to avoid dupes-->
+		<div class="fullMessage categorizeus{{id}} discussion" id="{{id}}">
+			<div class="commentsContainer">
+				<div class="comment primary">
+					<div class="avatar">
+						<a href="javascript:void(0);"><img src="images/sillohuette.png"
+							width="55" height="55" alt="{{postedBy.userName}} avatar"></a>
+					</div>
+					<div class="comment-content">
+						<header>
+							<span class="title">{{title}}</span>
+							<a href="javascript:void(0);" class="userlink">{{postedBy.userName}}</a> - <span
+								class="pubdate">posted TODO time units ago</span>
+							<input type="button" class="closeButton" value="close"/>
+							<input type="button" class="replyButton" value="reply"/>
+						</header>
+						{{#if link}}
+							<a href="{{link}}" target="_blank">
+	              <img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
+							</a>
+						{{/if}}
+						<p>
+							{{body}}
+						</p>
+					</div>
+					<ul class="replies categorizeus{{id}}">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</script>
+  
+  <!-- Form for editing or submitting documents -->
+	<script id="tmplBasicDocumentEdit" type="text/x-handlebars-template">
+		<div class="basicDocumentEdit">
+			<input class="inputMsgId" type="hidden" name="messageId" value="{{id}}"/>
+			<input class="repliesToId" type="hidden" name="repliesId" value="{{repliesToId}}"/>
+			<p>Title <input class="inputMsgTitle" type="text" value="{{title}}"/></p>
+			<p>Body <textarea class="inputMsgBody" rows="4" cols="87" type="text">{{body}}</textarea></p>
+			<p>Attachment <input class="inputFileAttachment" type="file"/></p>
+			<p>Tags <input class="inputMsgTags" type="text" value=""/></p>
+			<input type="button" class="inputMsgBtn" value="Submit"/>
+			<input type="button" class="closeButton" value="close"/>
+		</div>
+	</script>
+  
+  <!-- Form for logging into the site-->
+	<script id="tmplLogin" type="text/x-handlebars-template">
+		<div class="login">
+			<p>Username <input class="txtUsername" type="text"/></p>
+			<p>Password <input class="txtPassword" type="password"/></p>
+			<input type="button" class="btnLogin" value="Login"/>
+			<input type="button" class="closeButton" value="close"/>
+		</div>
+	</script>
+	<script id="tmplRegister" type="text/x-handlebars-template">
+		<div class="register">
+			<p>Username <input class="txtUsername" type="text"/></p>
+			<p>Password <input class="txtPassword" type="password"/></p>
+			<input type="button" class="btnRegister" value="Register"/>
+		</div>
+	</script>
+</head>
+<body>
+  <!-- The menu bar at the top of the screen -->
+  <div class="header">
+    <div class="mainNavItems">
+    	<div id="btnCategorizeUs" class="navItem categorizeUsButton">categorize.us</div>
+      <input id="txtTagSearch" class="tagText" type="text" placeholder="Tags to Search or Click Tag to Change Mode" width=200/>
+    	<div id="btnSearch" class="navItem searchButton">Search</div>
+    	<div id="btnTag" class="navItem tagButton">Tag Mode</div>
+    </div>
+    <div class="personalNavItems">
+    	<div id="btnPost" class="navItem postButton">Post</div>
+      <div class="userInfo"><div class="userGreeting"></div><input id="btnShowLogin" type="button" value="login"/></div>
+  	  <!--
+        <div id="btnNotifications" class="navItem notificationsButton">Notifications</div>
+  	    <div id="btnAbout" class="navItem aboutButton">About</div>
+      -->  
+      
+    </div>
+  </div>
+  
+  <!-- This is the flexbox section for the overall navigation on the site -->
+  <div id='main'>
+    <div class="article">
+      <div id="content" class="gallery">
+      </div>
+      <div id="editor">
+
+      </div>
+    </div>
+    <div class="nav unseen">
+      <div  id="status">
+      </div>
+    </div>
+    <div class="aside unseen">
+    	icons courtesy https://thenounproject.com<br/>
+    	Specific Icon Credits:<br/>
+    	enso by Bluetip Design<br/>
+    	search by Bernar Novalyi<br/>
+    	tag by Bryn Taylor<br/>
+    	camera by Arthur Shlain<br/>
+    	thumbs by Justin Blake<br/>
+    	envelope by David Nesbitt<br/>
+    	about by Umesh Vgl<br/>
+    	edit by abhishek rana <br/>
+    </div>
+  </div>
+</body>
+
+</html>
