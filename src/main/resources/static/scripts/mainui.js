@@ -76,7 +76,7 @@ var initialize = function(dontDoInitialSearch){
 		}else{
 			displayEditForm("#editor", {}, function(){
 				delete currentThread.searchCriteria.startingId;
-				searchThreadCriteria(currentThread.searchCriteria, displayMessageThread);
+				searchThreadCriteria(currentThread.searchCriteria, displayMessages);
 			});
 		}
 	});
@@ -88,7 +88,7 @@ var initialize = function(dontDoInitialSearch){
 		}
 		var tags = $("#txtTagSearch").val();
 		var allTags = tags.split(" ");
-		var tagArray = ["top"];
+		var tagArray = [];
 		for(var i=0; i<allTags.length;i++){
 			if(allTags[i].length>0){
 				tagArray.push(allTags[i]);
