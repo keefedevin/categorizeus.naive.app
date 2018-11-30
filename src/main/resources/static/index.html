@@ -13,23 +13,23 @@
   </script>
   <!-- This is the template for the items in the main grid view-->
 	<script id="tmplBasicDocument" type="text/x-handlebars-template">
-		<div class="basicDocument categorizeus{{id}}" id="{{id}}">
-			<h1>{{title}}</h1>
-			{{#if link}}
-				<a href="{{link}}" target="_blank">
+		<div class="basicDocument categorizeus{{message.id}}" id="{{message.id}}">
+			<h1>{{message.title}}</h1>
+			{{#if message.link}}
+				<a href="{{message.link}}" target="_blank">
 					<img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
 				</a>
 			{{/if}}
 			<div class="postedBy">
-				posted by {{postedBy.userName}}
+				posted by {{postedBy.username}}
 				<input type="button" class="viewButton" value="view"/>
 			</div>
 			Tags :
 			{{#each tags}}
-				{{tag}},
+				{{this}},
 			{{/each}}
 			<div class="body">
-				{{body}}
+				{{message.body}}
 			</div>
 		</div>
 	</script>

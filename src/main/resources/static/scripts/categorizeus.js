@@ -61,7 +61,7 @@ var searchThreadCriteria = function(threadCriteria, cb){
 		headers: {
 			Accept: "application/json; charset=utf-8"
 		},
-		url:deployPrefix+'/messages?tags='+threadCriteria.searchTags.join(),
+		url:deployPrefix+'/messages?loadMetadata=true&tags='+threadCriteria.searchTags.join(),
 		method:'GET'
 	}).done(function(messageThread, statusCode){//TODO fail handler
 		if(statusCode!='success'){
