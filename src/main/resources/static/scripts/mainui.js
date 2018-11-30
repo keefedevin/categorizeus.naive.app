@@ -48,7 +48,7 @@ var initialize = function(dontDoInitialSearch){
 		currentUser = user;
 		$("#btnShowLogin").prop("value", "logout");
 		console.log(user);
-		$(".userGreeting").html("Hi, "+user.userName+"!");
+		$(".userGreeting").html("Hi, "+user.username+"!");
 	});
   if(!dontDoInitialSearch){
   	tagSearchThread([], displayMessages);

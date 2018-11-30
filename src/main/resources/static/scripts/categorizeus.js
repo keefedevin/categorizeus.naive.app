@@ -182,7 +182,10 @@ var loginUser = function(username, password, cb){
 
 var fetchCurrentUser = function(cb){
 	$.ajax({
-		url:deployPrefix+'/user/',
+		headers: {
+			Accept: "application/json; charset=utf-8"
+		},
+		url:deployPrefix+'/users/principal',
 		accepts:'application/json'
 	}).done(function(currentUser, statusCode){
 		console.log("In Response " + statusCode);
@@ -202,9 +205,11 @@ var fetchCurrentUser = function(cb){
 
 var logoutUser = function(cb){
 	$.ajax({
-		url:deployPrefix+'/user/',
-		method:'DELETE',
-		accepts:'application/json'
+		headers: {
+			Accept: "application/json; charset=utf-8"
+		},
+		url:deployPrefix+'/auth/logout',
+		method:'POST'
 	}).done(function(currentUser, statusCode){
 		console.log("In Response " + statusCode);
 		if(statusCode!='success'){
