@@ -1,9 +1,9 @@
 /**
-This is the javascript http api for a categorize.us server, using jquery. 
+This is the javascript http api for a categorize.us server, using jquery.
 There should be no UI specific code in this file, it should all be in callbacks.
 **/
 //var deployPrefix = "https://ectiaevu68.execute-api.us-west-2.amazonaws.com/testing";
-var deployPrefix = "";
+var deployPrefix = "/v1";
 
 var tagMessages = function(tagArray, messageArray, cb){
 	var payload = {
@@ -58,11 +58,12 @@ var tagSearchThread = function(tagArray, cb){
 
 var searchThreadCriteria = function(threadCriteria, cb){
 	$.ajax({
-		url:deployPrefix+'/thread/',
+		headers: {
+			Accept: "application/json; charset=utf-8"   
+		},
+		url:deployPrefix+'/messages?tags='+threadCriteria.searchTags.join(),
 		accepts:'application/json',
-		method:'POST',
-		contentType:"application/json",
-		data:JSON.stringify(threadCriteria)
+		method:'GET'
 	}).done(function(messageThread, statusCode){//TODO fail handler
 		if(statusCode!='success'){
 			if(cb){
@@ -126,7 +127,7 @@ var createEncodedMessage = function(message, files, cb){
   if(files[0]!=null){
     console.log(files[0]);
     if(files[0].type.startsWith("image") && files[0].size<1024*1024*2){//TODO hard coded, ick
-      reader.readAsDataURL(files[0]);      
+      reader.readAsDataURL(files[0]);
     }else{
       alert("Invalid Attachment detected, please try again!");
     }
@@ -175,7 +176,7 @@ var fetchCurrentUser = function(cb){
 		if(cb!=null){
 			cb("User is not Logged In");
 		}
-	});	
+	});
 };
 
 var logoutUser = function(cb){
@@ -196,7 +197,7 @@ var logoutUser = function(cb){
 		if(cb!=null){
 			cb("User is not Logged In");
 		}
-	});	
+	});
 };
 
 
