@@ -157,9 +157,6 @@ var displayEditForm = function(container, sourceMsg, cb){//#TODO don't just repl
 var displayLoginForm = function(container){ //#TODO hey we are seeing a template pattern here, let's generalize it
 	var controls = $(container).html(tmplLogin({}));
 	controls.find(".btnLogin").click(dynamicLogin(controls));
-	controls.find(".btnLoginTwitter").click(function(){
-		document.location.href="/twitter_signin";
-	});
 	controls.find(".closeButton").click(function(){
 		controls.empty();
 	});
@@ -332,7 +329,7 @@ var dynamicLogin = function(el){
 			}else{//TODO merge with the logout, get current user stuff
 				currentUser = user;
 				$("#btnShowLogin").prop("value", "logout");
-    		$(".userGreeting").html("Hi, "+user.userName+"!");
+    		$(".userGreeting").html("Hi, "+user.username+"!");
 			}
 			el.empty();
 		});

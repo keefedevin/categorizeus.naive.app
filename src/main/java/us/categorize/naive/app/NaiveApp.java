@@ -12,6 +12,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import us.categorize.Config;
 import us.categorize.Configuration;
 import us.categorize.NaiveBootstrap;
+import us.categorize.model.User;
 import us.categorize.naive.NaiveMessageStore;
 import us.categorize.naive.NaiveUserStore;
 import us.categorize.naive.api.NaiveAuthorizer;
@@ -29,7 +30,13 @@ public class NaiveApp {
 		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection()));
 		Configuration.instance().setUserStore(new NaiveUserStore(config.getDatabaseConnection()));
 		Configuration.instance().setAuthorizer(new NaiveAuthorizer(Configuration.instance().getUserStore()));
-
+		
+		/*
+		User user = new User();
+		user.setUsername("kroeders");
+		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("35789fb6e")));
+		Configuration.instance().getUserStore().registerUser(user);
+		*/
         Server server = new Server(8080);
 
         ServletContextHandler ctx = 
