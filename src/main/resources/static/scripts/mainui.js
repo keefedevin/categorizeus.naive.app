@@ -1,7 +1,7 @@
 $(document).ready(function(){
 	$("#btnCategorizeUs").click(function(event){
 		location.reload(true);
-	});	
+	});
 	$("#btnNotifications").click(function(event){
 
 	});
@@ -43,7 +43,7 @@ var initialize = function(dontDoInitialSearch){
 		if(err!=null){
 			console.log("Nobody is logged in");
 			console.log(err);
-			return; 
+			return;
 		}
 		currentUser = user;
 		$("#btnShowLogin").prop("value", "logout");
@@ -51,7 +51,7 @@ var initialize = function(dontDoInitialSearch){
 		$(".userGreeting").html("Hi, "+user.userName+"!");
 	});
   if(!dontDoInitialSearch){
-  	tagSearchThread(["top"], displayMessageThread);    
+  	tagSearchThread([], displayMessageThread);    
   }
 	$("#btnShowLogin").click(function(){
 		if(currentUser==null){
@@ -94,21 +94,21 @@ var initialize = function(dontDoInitialSearch){
 				tagArray.push(allTags[i]);
 			}
 		}
-		tagSearchThread(tagArray, displayMessageThread);	
+		tagSearchThread(tagArray, displayMessageThread);
 	});
 
 	$("#btnTag").click(function(){
-    
+
 	    tagSelectMode = !tagSelectMode;
 	    $("#btnTag").toggleClass('selected');
 	    $(".basicDocument").toggleClass('selectable');
 	    if(tagSelectMode){
-	      $("#btnSearch").html("Apply Tag"); 
+	      $("#btnSearch").html("Apply Tag");
 	    }else{
 	      $("#btnSearch").html("Search");
 	    }
     	return;
-    
+
 	});
 }
 
@@ -119,7 +119,7 @@ var tagSelectedMessages = function(){
 	for(var i=0; i<allTags.length;i++){
 		if(allTags[i].length>0){
 			tagArray.push(allTags[i]);
-		}		
+		}
 	}
 
 	var whichTagged = [];
@@ -140,7 +140,7 @@ var tagSelectedMessages = function(){
 		if(err!=null){
 			$("#status").html(err);
 		}else{
-			$("#status").html("Tagged Messages Successfully");	
+			$("#status").html("Tagged Messages Successfully");
 		}
 	});
 }
@@ -215,7 +215,7 @@ var displayFullMessage = function(message){
 				console.log("Replying to " + message.id);
 				var replyForm = messageView.append(tmplBasicDocumentEdit({repliesToId:message.id}));
 				replyForm.find(".inputMsgBtn").click(dynamicEditSubmit(replyForm));
-				
+
 				replyForm.find(".closeButton").click(function(event){
 					replyForm.find(".basicDocumentEdit").remove();
 				});
@@ -254,7 +254,7 @@ var addThreadRelation = function(relation){
 	if(threadRelations[relation.sink.id]==null){//TODO source/sink vocab here is iffy at best
 		threadRelations[relation.sink.id] = [];
 	}
-	threadRelations[relation.sink.id].push(relation.source.id);//this is obviously assuming one predicate a.t.m.	
+	threadRelations[relation.sink.id].push(relation.source.id);//this is obviously assuming one predicate a.t.m.
 }
 
 
@@ -280,7 +280,7 @@ var displayMessages = function(err, messages){
 		var newMessage = $("#content").append(appliedTemplate);
 
 		appliedTemplate.bind('click',
-		   (function(template, message){ 
+		   (function(template, message){
 			return function(event){
 			      handleGridDocumentClick(event, template, message);
 			}
@@ -312,9 +312,9 @@ var displayMessages = function(err, messages){
 			startingId = currentThread.thread[0].id;
 		}else{
 			if(currentThread!=null && !currentThread.searchCriteria.reverse && currentThread.searchCriteria.startingId!=null){
-				startingId = currentThread.searchCriteria.startingId;						
+				startingId = currentThread.searchCriteria.startingId;
 			}
-		}    
+		}
 		console.log("Previous Link Click " + startingId);
     var newSearch = $.extend({}, currentThread.searchCriteria)
 		newSearch.startingId = startingId;
