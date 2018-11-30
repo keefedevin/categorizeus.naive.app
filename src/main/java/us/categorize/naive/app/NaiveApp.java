@@ -26,9 +26,8 @@ public class NaiveApp {
 		properties.load(input);
 		
 		Config config = Config.readRelativeConfig();
-		
-		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection()));
 		Configuration.instance().setUserStore(new NaiveUserStore(config.getDatabaseConnection()));
+		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection(), Configuration.instance().getUserStore()));
 		Configuration.instance().setAuthorizer(new NaiveAuthorizer(Configuration.instance().getUserStore()));
 		
 		/*
