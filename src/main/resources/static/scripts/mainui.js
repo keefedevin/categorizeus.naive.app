@@ -51,7 +51,7 @@ var initialize = function(dontDoInitialSearch){
 		$(".userGreeting").html("Hi, "+user.userName+"!");
 	});
   if(!dontDoInitialSearch){
-  	tagSearchThread([], displayMessageThread);    
+  	tagSearchThread([], displayMessages);
   }
 	$("#btnShowLogin").click(function(){
 		if(currentUser==null){
@@ -94,7 +94,7 @@ var initialize = function(dontDoInitialSearch){
 				tagArray.push(allTags[i]);
 			}
 		}
-		tagSearchThread(tagArray, displayMessageThread);
+		tagSearchThread(tagArray, displayMessages);
 	});
 
 	$("#btnTag").click(function(){

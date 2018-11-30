@@ -59,10 +59,9 @@ var tagSearchThread = function(tagArray, cb){
 var searchThreadCriteria = function(threadCriteria, cb){
 	$.ajax({
 		headers: {
-			Accept: "application/json; charset=utf-8"   
+			Accept: "application/json; charset=utf-8"
 		},
 		url:deployPrefix+'/messages?tags='+threadCriteria.searchTags.join(),
-		accepts:'application/json',
 		method:'GET'
 	}).done(function(messageThread, statusCode){//TODO fail handler
 		if(statusCode!='success'){
