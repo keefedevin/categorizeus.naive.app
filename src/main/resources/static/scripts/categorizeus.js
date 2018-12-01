@@ -125,21 +125,62 @@ var createMessage = function(message, cb){
 	});
 };
 
-var createEncodedMessage = function(message, files, cb){
-  var reader = new FileReader();
+var createMessageWithAttachment = function(message, files, cb){
+  /*var reader = new FileReader();
   reader.addEventListener("load", function(){
-    message.attachment = {
+		message.attachment = {
       name:files[0].name,
       type:files[0].type,
       dataURL:reader.result,
       size:files[0].size
     }
-    createMessage(message, cb);
-  });
+		reader.readAsArrayBuffer(files[0]);
+
+		var fd = new FormData();
+		fd.append("file", reader.result);
+  });*/
   if(files[0]!=null){
     console.log(files[0]);
-    if(files[0].type.startsWith("image") && files[0].size<1024*1024*2){//TODO hard coded, ick
-      reader.readAsDataURL(files[0]);
+    if(files[0].type.startsWith("image")){
+			createMessage(message, function(error, uploadedMessage){
+				if(error){
+					if(cb){
+						cb(error);
+					}
+					return;
+				}
+				var fd = new FormData();
+				fd.append("file", files[0]);
+				$.ajax({
+					headers: {
+						Accept: "application/json; charset=utf-8"
+					},
+					url:deployPrefix+'/messages/'+uploadedMessage.id+"/attachments",
+					method:'POST',
+					contentType: false,
+					mimeType: 'multipart/form-data',
+					processData:false,
+					data:fd
+				}).done(function(response, statusCode){
+					console.log("In Response " + statusCode);
+					console.log(response);
+					if(tags && tags.length>0){
+						var tagArray = tags.split(",");
+						for(var t of tagArray){
+							tagMessage(response.id, t);
+						}
+					}
+					if(statusCode!='success'){
+						if(cb){
+							cb("Please Login to Post", response);
+						}
+					}else if(cb){
+						cb(null, response);
+					}
+				}).fail(function(){
+					cb("Please Login to Post");
+				});
+			});
     }else{
       alert("Invalid Attachment detected, please try again!");
     }

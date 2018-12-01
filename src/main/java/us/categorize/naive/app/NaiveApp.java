@@ -27,7 +27,7 @@ public class NaiveApp {
 		
 		Config config = Config.readRelativeConfig();
 		Configuration.instance().setUserStore(new NaiveUserStore(config.getDatabaseConnection()));
-		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection(), Configuration.instance().getUserStore()));
+		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection(), Configuration.instance().getUserStore(), config.getFileBase()));
 		Configuration.instance().setAuthorizer(new NaiveAuthorizer(Configuration.instance().getUserStore()));
 		
 		/*
@@ -51,6 +51,8 @@ public class NaiveApp {
         serHol.setInitOrder(1);
         serHol.setInitParameter("jersey.config.server.provider.packages", 
                 "us.categorize.server;us.categorize.naive.users.server");
+        serHol.setInitParameter("jersey.config.server.provider.classnames", 
+                "org.glassfish.jersey.media.multipart.MultiPartFeature");
         ctx.addServlet(DefaultServlet.class, "/");
         try {
             server.start();

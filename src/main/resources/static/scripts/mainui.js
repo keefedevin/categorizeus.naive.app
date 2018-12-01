@@ -390,7 +390,7 @@ var dynamicEditSubmit = function(el, cb){
 			if(file.val()!==''){//file[0].files.length?
 				console.log("Found an attached file");
 				console.log(file[0].files);
-				createEncodedMessage(newMessage, file[0].files, handleCreatedMessage);
+				createMessageWithAttachment(newMessage, file[0].files, handleCreatedMessage);
 				return;
 			}
 			createMessage(newMessage, handleCreatedMessage);
