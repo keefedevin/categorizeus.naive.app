@@ -4,18 +4,15 @@ There should be no UI specific code in this file, it should all be in callbacks.
 **/
 //var deployPrefix = "https://ectiaevu68.execute-api.us-west-2.amazonaws.com/testing";
 var deployPrefix = "/v1";
-
-var tagMessages = function(tagArray, messageArray, cb){
-	var payload = {
-		tags:tagArray,
-		messages:messageArray
-	};
+var tagMessage = function(messageId, tag, cb){
 	$.ajax({
-		url:deployPrefix+'/tag/',
+		headers: {
+			Accept: "application/json; charset=utf-8"
+		},
+		url:deployPrefix+'/messages/'+messageId+"/tags/"+tag,
 		accepts:'application/json',
 		method:'PUT',
-		contentType:"application/json",
-		data:JSON.stringify(payload)
+		contentType:"application/json"
 	}).done(function(message, statusCode){
 		if(cb){//TODO check for status code here?
 			cb(null, message);
@@ -25,6 +22,13 @@ var tagMessages = function(tagArray, messageArray, cb){
 			cb("Can't tag messages for some reason");
 		}
 	});
+}
+var tagMessages = function(tagArray, messageIdArray, cb){
+	for(var messageId of messageIdArray){
+		for(var tag of tagArray){
+			tagMessage(messageId, tag);//callback hell, need to rewrite this to tag one, do next etc some async thing
+		}
+	}
 };
 
 var tagSearch = function(tagArray, cb){
@@ -92,14 +96,23 @@ var loadMessage = function(id, cb){
 };
 
 var createMessage = function(message, cb){
+	//adapting message to new format, hackish
+	var tags = message.tags;
+	delete message.tags;
 	$.ajax({
-		url:deployPrefix+'/msg/',
+		url:deployPrefix+'/messages/',
 		method:'POST',
 		contentType:"application/json",
 		data:JSON.stringify(message)
 	}).done(function(response, statusCode){
 		console.log("In Response " + statusCode);
 		console.log(response);
+		if(tags && tags.length>0){
+			var tagArray = tags.split(",");
+			for(var t of tagArray){
+				tagMessage(response.id, t);
+			}
+		}
 		if(statusCode!='success'){
 			if(cb){
 				cb("Please Login to Post", response);
