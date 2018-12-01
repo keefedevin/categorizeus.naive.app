@@ -15,11 +15,11 @@
 	<script id="tmplBasicDocument" type="text/x-handlebars-template">
 		<div class="basicDocument categorizeus{{message.id}}" id="{{message.id}}">
 			<h1>{{message.title}}</h1>
-			{{#if message.link}}
-				<a href="{{message.link}}" target="_blank">
-					<img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
-				</a>
-			{{/if}}
+      {{#if attachment}}
+        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
+          <img src="files/{{attachment.id}}{{attachment.extension}}" width="200px" height="200px"/>
+        </a>
+      {{/if}}
 			<div class="postedBy">
 				posted by {{postedBy.username}}
 				<input type="button" class="viewButton" value="view"/>
@@ -65,11 +65,11 @@
 						class="pubdate">posted TODO time units ago</span>
 					<input type="button" class="replyButton" value="reply"/>
 				</header>
-				{{#if link}}
-					<a href="{{link}}" target="_blank">
-				    <img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
-					</a>
-				{{/if}}
+        {{#if attachment}}
+          <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
+            <img src="files/{{attachment.id}}{{attachment.extension}}"/>
+          </a>
+        {{/if}}
 				<p>
 					{{body}}
 				</p>
@@ -98,9 +98,9 @@
 							<input type="button" class="closeButton" value="close"/>
 							<input type="button" class="replyButton" value="reply"/>
 						</header>
-						{{#if link}}
-							<a href="{{link}}" target="_blank">
-	              <img src="{{thumbLink}}" width="{{thumbWidth}}px" height="{{thumbHeight}}px"/>
+						{{#if attachment}}
+							<a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
+	              <img src="files/{{attachment.id}}{{attachment.extension}}"/>
 							</a>
 						{{/if}}
 						<p>

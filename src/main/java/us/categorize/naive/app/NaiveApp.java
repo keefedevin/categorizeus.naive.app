@@ -30,12 +30,12 @@ public class NaiveApp {
 		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection(), Configuration.instance().getUserStore(), config.getFileBase()));
 		Configuration.instance().setAuthorizer(new NaiveAuthorizer(Configuration.instance().getUserStore()));
 		
-		/*
+		
 		User user = new User();
 		user.setUsername("kroeders");
 		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("35789fb6e")));
 		Configuration.instance().getUserStore().registerUser(user);
-		*/
+		
         Server server = new Server(8080);
 
         ServletContextHandler ctx = 

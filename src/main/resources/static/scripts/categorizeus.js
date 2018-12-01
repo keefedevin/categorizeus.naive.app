@@ -164,12 +164,6 @@ var createMessageWithAttachment = function(message, files, cb){
 				}).done(function(response, statusCode){
 					console.log("In Response " + statusCode);
 					console.log(response);
-					if(tags && tags.length>0){
-						var tagArray = tags.split(",");
-						for(var t of tagArray){
-							tagMessage(response.id, t);
-						}
-					}
 					if(statusCode!='success'){
 						if(cb){
 							cb("Please Login to Post", response);
