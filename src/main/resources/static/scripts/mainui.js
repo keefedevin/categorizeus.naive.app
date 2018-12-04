@@ -1,42 +1,19 @@
-$(document).ready(function(){
-	$("#btnCategorizeUs").click(function(event){
-		location.reload(true);
-	});
-	$("#btnNotifications").click(function(event){
-
-	});
-	$("#btnSearch").click(function(event){
-
-	});
-	$("#btnPost").click(function(event){
-
-	});
-	$("#btnAbout").click(function(event){
-		$(".aside").toggle("unseen");
-		$(".nav").toggle("unseen");
-	});
-});
-
 var tmplBasicDocument;
 var tmplBasicDocumentEdit;
 var tmplLogin;
 var tmplRegister;
-var tmplFullMessage;
-var currentThread;
 var tmplIndividualComment;
 var tmplNavigation;
-var threadRelations = {};
-var threadMessages = {};
-var lastStartingId = null;
+
+
 var currentUser = null;
 var tagSelectMode = false;
-var currentMessage = null;
+var currentThread;
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
 	tmplBasicDocumentEdit = Handlebars.compile($("#tmplBasicDocumentEdit").html());//notice the pattern, probably put these in an object and generalize
 	tmplLogin = Handlebars.compile($("#tmplLogin").html());
-	tmplFullMessage = Handlebars.compile($("#tmplFullMessage").html());
 	tmplIndividualComment = Handlebars.compile($("#tmplIndividualComment").html());
 	tmplNavigation= Handlebars.compile($("#tmplNavigation").html());
 	fetchCurrentUser(function(err, user){
@@ -75,8 +52,7 @@ var initialize = function(dontDoInitialSearch){
 			displayLoginForm("#editor");
 		}else{
 			displayEditForm("#editor", {}, function(){
-				delete currentThread.searchCriteria.startingId;
-				searchThreadCriteria(currentThread.searchCriteria, displayMessages);
+				tagSearchThread(lastTags, displayMessages);
 			});
 		}
 	});
@@ -137,6 +113,8 @@ var tagSelectedMessages = function(){
 	}
 	tagMessages(tagArray, whichTagged,function(err, message){
     $('.basicDocument.selected').toggleClass('selected');
+		tagSearchThread(lastTags, displayMessages);
+
 		if(err!=null){
 			$("#status").html(err);
 		}else{
@@ -162,98 +140,10 @@ var displayLoginForm = function(container){ //#TODO hey we are seeing a template
 	});
 }
 
-var displayMessageEditorCB = function(message, messageView){
-  return function(event){
-		console.log("Replying to " + message.id);
-    	displayEditForm("#editor", {repliesToId:message.id}, function(newMessage){
-    		console.log("Reply to " + message.id + " is complete");
-    		var newRelation = {
-    			tag:"repliesTo",
-    			sink:message,
-    			source:newMessage
-    		};
-    		threadMessages[newMessage.id] = newMessage;
-    		addThreadRelation(newRelation);
-		$(".fullMessage").remove();
-    		displayFullMessage(currentMessage);
-		});
-  };
-}
-
-var displayMessageComments = function(message, messageView){
-	if(threadRelations[message.id]!=null){
-		for(var relatedMessage in threadRelations[message.id]){
-			var replyId = threadRelations[message.id][relatedMessage];
-			console.log("Need to display " + replyId);
-			var appliedTemplate = $(tmplIndividualComment(threadMessages[replyId]));
-			var newComment = $("#content").find(".replies.categorizeus"+message.id);
-			newComment.append(appliedTemplate);
-			var newCommentView = $("#content").find(".comment.categorizeus"+replyId);
-			newCommentView.find(".replyButton").click(displayMessageEditorCB(threadMessages[replyId], newCommentView));
-			displayMessageComments(threadMessages[replyId], newCommentView);//DANGER infinite loop possible
-
-		}
-	}
-}
-var displayFullMessage = function(message){
-	console.log("View " + JSON.stringify(message));
-	currentMessage = message;
-	var appliedTemplate = $(tmplFullMessage(message));
-	var newFullMessage = $("#content").append(appliedTemplate);
-	var newMessageView = $("#content").find(".fullMessage.categorizeus"+message.id);
-	newMessageView.find(".closeButton").click((function(message, messageView){
-			return function(event){
-				messageView.remove();
-			};
-	})(message, newMessageView));
-	newMessageView.find(".replyButton").click(displayMessageEditorCB(message, newMessageView));
-	/*newMessageView.find(".replyButton").click((function(message, messageView){
-			return function(event){
-				console.log("Replying to " + message.id);
-				var replyForm = messageView.append(tmplBasicDocumentEdit({repliesToId:message.id}));
-				replyForm.find(".inputMsgBtn").click(dynamicEditSubmit(replyForm));
-
-				replyForm.find(".closeButton").click(function(event){
-					replyForm.find(".basicDocumentEdit").remove();
-				});
-
-			};
-	})(message, newMessageView));*/
-	displayMessageComments(message, newMessageView);
-}
-
 var displayRegisterForm = function(container){ //#TODO hey we are seeing a template pattern here, let's generalize it
 	var controls = $(container).html(tmplRegister({}));
 	controls.find(".btnRegister").click(dynamicRegister(controls));
 }
-var displayMessageThread = function(err, messageThread){
-  if(messageThread.thread.length==0){
-    alert("Attempted new search, but no results were found");
-    return;
-  }
-	currentThread = messageThread;
-	threadRelations = {};
-	threadMessages = {};
-	for(var message of currentThread.thread){
-		threadMessages[message.id] = message;
-	}
-	for(var message of currentThread.relatedMessages){
-		threadMessages[message.id] = message;
-	}
-	for(var relation of currentThread.relations){
-		addThreadRelation(relation);
-	}
-	displayMessages(err, currentThread.thread);
-}
-
-var addThreadRelation = function(relation){
-	console.log(relation);
-	if(threadRelations[relation.sink.id]==null){//TODO source/sink vocab here is iffy at best
-		threadRelations[relation.sink.id] = [];
-	}
-	threadRelations[relation.sink.id].push(relation.source.id);//this is obviously assuming one predicate a.t.m.
-}
-
 
 var handleGridDocumentClick = function(event, template, message){
 	if(tagSelectMode ){
@@ -272,53 +162,91 @@ var handleGridDocumentClick = function(event, template, message){
 var displayMessages = function(err, messages){
 	$("#content").empty();
 	for(var i=0; i<messages.length;i++){
-
 		var appliedTemplate = $(tmplBasicDocument(messages[i]));
 		var newMessage = $("#content").append(appliedTemplate);
 
 		appliedTemplate.bind('click',
 		   (function(template, message){
-			return function(event){
-			      handleGridDocumentClick(event, template, message);
-			}
+						return function(event){
+						      handleGridDocumentClick(event, template, message);
+						}
 		   })(appliedTemplate, messages[i])
 		);
-		var newMessageView = $("#content").find(".basicDocument.categorizeus"+messages[i].id);
+		var qry = ".basicDocument.categorizeus"+messages[i].message.id;
+		var newMessageView = $("#content").find(qry);
 		newMessageView.find(".viewButton").click((function(message){
 			return function(event){
-				displayFullMessage(message);
+				console.log("View button is clicked for " + message.message.id);
+				loadMessage(message.message.id, function(error, messageThread){
+					console.log(messageThread);
+					displayMessageThread(message, messageThread);
+				});
 			};
 		})(messages[i]));
 	}
 	$("#content").append($(tmplNavigation({})));
 	$("#content").find(".nextLink").click(function(event){
-		if(currentThread!=null && currentThread.thread!=null && currentThread.thread.length>0){
-      var newSearch = $.extend({}, currentThread.searchCriteria)
-			console.log("Next Link Click, let's look after : " + currentThread.thread[currentThread.thread.length-1].id);
-			newSearch.startingId = currentThread.thread[currentThread.thread.length-1].id;
-			newSearch.reverse = false;
-			searchThreadCriteria(newSearch, displayMessageThread);
-		}else{
-			alert("Next Link Click, not sure what to do");
-		}
+		nextPage(displayMessages);
 	});
 	$("#content").find(".previousLink").click(function(event){
-
-		var startingId = 10;//TODO think about when the if block could fall through to this
-		if(currentThread!=null && currentThread.thread!=null && currentThread.thread.length>0){
-			startingId = currentThread.thread[0].id;
-		}else{
-			if(currentThread!=null && !currentThread.searchCriteria.reverse && currentThread.searchCriteria.startingId!=null){
-				startingId = currentThread.searchCriteria.startingId;
-			}
-		}
-		console.log("Previous Link Click " + startingId);
-    var newSearch = $.extend({}, currentThread.searchCriteria)
-		newSearch.startingId = startingId;
-		newSearch.reverse = true;
-		searchThreadCriteria(newSearch, displayMessageThread);
+		previousPage(displayMessages);
 	});
 };
+
+var displayMessageThread = function(message, thread){
+	$("#content").empty();
+	currentMessage = message;
+
+	var id2message = {};
+	id2message[message.message.id] =  message;
+	for(var msg of thread){
+		id2message[msg.message.id] = msg;
+	}
+	for(var msg of thread){
+		if(!id2message[msg.message.repliesTo].children){
+			id2message[msg.message.repliesTo].children = [];
+		}
+		id2message[msg.message.repliesTo].children.push(msg);
+	}
+
+	var traverseThread = function(msg, depth){
+		addComment(msg, depth);
+		msg.visited = true;
+
+		if(msg.children)
+		for(var reply of msg.children){
+			if(!reply.visited){
+					traverseThread(reply, depth+1);
+			}
+		}
+	}
+	traverseThread(message, 0);
+//newMessageView.find(".replyButton").click(displayMessageEditorCB(message, newMessageView));
+}
+var addComment = function(message, depth){
+	var leftPad = 65 + depth*35;
+	var appliedTemplate = $(tmplIndividualComment(message));
+	var newFullMessage = $("#content").append(appliedTemplate);
+	appliedTemplate.css("padding-left", leftPad+"px");
+	var newMessageView = $("#content").find(".categorizeus"+message.message.id);
+	newMessageView.find(".closeButton").click((function(message, messageView){
+			return function(event){
+				tagSearchThread(lastTags, displayMessages);
+			};
+	})(message, newMessageView));
+	newMessageView.find(".replyButton").click((function(message, messageView){
+			return function(event){
+				console.log("Reply to " + message.message.id);
+				displayEditForm("#editor", {}, function(){
+					loadMessage(currentMessage.message.id, function(error, messageThread){
+						console.log(messageThread);
+						displayMessageThread(currentMessage, messageThread);
+					});
+				});
+				$(".repliesToId").val(message.message.id);
+			};
+	})(message, newMessageView));
+}
 var dynamicLogin = function(el){
 	return function(){
 		var username = el.find(".txtUsername").val();
@@ -373,7 +301,8 @@ var dynamicEditSubmit = function(el, cb){
 				tags:tags
 			};
 			if(repliesToId!=null&& repliesToId.length>0){
-				newMessage.repliesToId = repliesToId;
+				newMessage.repliesTo = repliesToId;
+				newMessage.rootRepliesTo = currentMessage.message.id;
 			}
 			var handleCreatedMessage = function(err, response){
 				if(err!=null){

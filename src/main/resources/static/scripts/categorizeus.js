@@ -4,6 +4,10 @@ There should be no UI specific code in this file, it should all be in callbacks.
 **/
 //var deployPrefix = "https://ectiaevu68.execute-api.us-west-2.amazonaws.com/testing";
 var deployPrefix = "/v1";
+var pageOn = 0;
+var pageSize = 10;
+var lastTags = null;
+
 var tagMessage = function(messageId, tag, cb){
 	$.ajax({
 		headers: {
@@ -53,43 +57,53 @@ var tagSearch = function(tagArray, cb){
 };
 
 var tagSearchThread = function(tagArray, cb){
-	var threadCriteria = {
-		searchTags:tagArray,
-		transitiveTags:["repliesTo"]
-	};
-	searchThreadCriteria(threadCriteria, cb);
+	lastTags = tagArray;
+	pageOn = 0;
+	pageSize = 10;
+	searchThreadCriteria(tagArray, cb);
 };
 
-var searchThreadCriteria = function(threadCriteria, cb){
+var searchThreadCriteria = function(tagArray, cb){
 	$.ajax({
 		headers: {
 			Accept: "application/json; charset=utf-8"
 		},
-		url:deployPrefix+'/messages?loadMetadata=true&tags='+threadCriteria.searchTags.join(),
+		url:deployPrefix+'/messages?loadMetadata=true&tags='+tagArray.join()+'&pageOn='+pageOn+'&pageSize='+pageSize,
 		method:'GET'
-	}).done(function(messageThread, statusCode){//TODO fail handler
+	}).done(function(messages, statusCode){//TODO fail handler
 		if(statusCode!='success'){
 			if(cb){
 				cb("Error doing tag search!");
 			}
 		}else if(cb){
-			cb(null, messageThread);
+			cb(null, messages);
 		}
 	});
 };
+var nextPage = function(cb){
+	pageOn++;
+	searchThreadCriteria(lastTags,cb);
+}
+var previousPage = function(cb){
+	pageOn--;
+	if(pageOn<0) pageOn = 0;
+	searchThreadCriteria(lastTags,cb);
+}
 
 var loadMessage = function(id, cb){
 	$.ajax({
-		url:deployPrefix+'/msg/'+id,
-		accepts:'application/json'
-	}).done(function(message, statusCode){
+		headers: {
+			Accept: "application/json; charset=utf-8"
+		},
+		url:deployPrefix+'/messages/'+id+'/thread'
+	}).done(function(messageThread, statusCode){
 		console.log("In Response " + statusCode);
 		if(statusCode!='success'){
 			if(cb){
 				cb("Error doing doc load!", response);
 			}
 		}else if(cb){
-			cb(null, message);
+			cb(null, messageThread);
 		}
 	});
 

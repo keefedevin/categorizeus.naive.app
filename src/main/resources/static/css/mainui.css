@@ -31,7 +31,7 @@
      .basicDocument.selectable:hover {
        border: 1px solid black;
      }
-     
+
     .basicDocument.selected {
       border: 3px solid black;
     }
@@ -46,12 +46,12 @@
     .basicDocument .body {
       font-size: 13px;
      }
-     
-     
+
+
      /**
-     
+
      Editor Forms
-     
+
      */
 
       .basicDocumentEdit{
@@ -64,13 +64,13 @@
  	    height:80%;
  	    transform: translate(-50%, -50%);
       }
-     
-     
+
+
      /*
      General section related to the 3 column layout and the top buttons
-     
+
      */
-     
+
      .login{
 	    background-color:#ddd;
 	    position: fixed;
@@ -81,7 +81,7 @@
 	    height:80%;
 	    transform: translate(-50%, -50%);
      }
- 
+
      .tagText{
        width:250px;
      }
@@ -104,14 +104,14 @@
          /* Return them to document order */
              order: 0;
          }
-  
+
          .nav, .aside, .header {
              min-height: 50px;
              max-height: 50px;
          }
      }
-     
-     
+
+
     .article {
         margin: 2px;
         padding: 3px;
@@ -122,9 +122,9 @@
         flex: 6;
         order: 2;
     }
-    
 
-    
+
+
 
     .nav {
         margin: 2px;
@@ -136,7 +136,7 @@
         flex: 1;
         order: 1;
     }
-  
+
    .aside {
         margin: 2px;
         padding: 3px;
@@ -150,8 +150,8 @@
     .unseen {
 	display: none;
     }
-    
- 
+
+
     .header {
         display: block;
         margin: 2px;
@@ -190,10 +190,10 @@
       margin-left: 5px;
       margin-top: 4px;
       margin-bottom: 5px;
-      
+
      }
      .categorizeUsButton {
-        background: url('/images/enso.png') no-repeat left center;    	
+        background: url('/images/enso.png') no-repeat left center;
         background-size: 25px 25px;
 
      }
@@ -201,29 +201,29 @@
      .notificationsButton {
         background: url('/images/message.png') no-repeat left center;
         background-size: 25px 25px;
-        
+
      }
      .postButton {
        background: url('/images/edit.png') no-repeat left center;
        background-size: 25px 25px;
-       
+
      }
 
      .aboutButton {
        background: url('/images/about.png') no-repeat left center;
        background-size: 25px 25px;
-       
+
      }
 
      .searchButton {
        background: url('/images/search.png') no-repeat left center;
        background-size: 25px 25px;
-       
+
      }
      .tagButton {
        background: url('/images/tag.png') no-repeat left center;
        background-size: 25px 25px;
-       
+
      }
      .tagButton.selected {
        border: 3px solid black;
@@ -235,7 +235,7 @@
 
 
     /*The fuck is this?
-    
+
     If this is removed, we end up with bunch of spacing issues, let's experiment later with moving these into the comments fields, just doing .fullMessage > * doesn't do the trick.
     */
 html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p,
@@ -252,7 +252,7 @@ html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p,
   	font: inherit;
   	vertical-align: baseline;
   	outline: none;
-  	box-sizing: border-box; 
+  	box-sizing: border-box;
 }
 
 
@@ -271,7 +271,7 @@ Section related to the individual tabbed in comments section
  overflow: visible;
  border-radius: 5px;
  border: 3px solid #e3e0ef;
- 
+
 }
 
 
@@ -394,6 +394,7 @@ html {
 	position: relative;
 	padding-left: 65px;
 	border-top: 1px solid #ddd;
+  width:100%;
 }
 
 .comment .avatar {
@@ -435,4 +436,3 @@ html {
 .comment .replies {
 	margin-bottom: 7px;
 }
-

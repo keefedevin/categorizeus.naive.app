@@ -11,7 +11,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import us.categorize.Config;
 import us.categorize.Configuration;
-import us.categorize.NaiveBootstrap;
 import us.categorize.model.User;
 import us.categorize.naive.NaiveMessageStore;
 import us.categorize.naive.NaiveUserStore;
@@ -22,7 +21,7 @@ public class NaiveApp {
 	public static void main(String[] args) throws Exception{
 		
 		Properties properties = new Properties();
-		InputStream input = NaiveBootstrap.class.getResourceAsStream("/categorizeus.naive.properties");
+		InputStream input = NaiveApp.class.getResourceAsStream("/categorizeus.naive.properties");
 		properties.load(input);
 		
 		Config config = Config.readRelativeConfig();

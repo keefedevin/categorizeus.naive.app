@@ -17,7 +17,7 @@
 			<h1>{{message.title}}</h1>
       {{#if attachment}}
         <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-          <img src="files/{{attachment.id}}{{attachment.extension}}" width="200px" height="200px"/>
+          <img src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
         </a>
       {{/if}}
 			<div class="postedBy">
@@ -51,7 +51,7 @@
 	</script>
   <!--A comment, not including the original post -->
 	<script id="tmplIndividualComment" type="text/x-handlebars-template"><!--figure out partials here to avoid dupes-->
-		<div class="comment categorizeus{{id}}">
+		<div class="comment categorizeus{{message.id}}">
 		<!--
 			<div class="avatar">
 				<a href="javascript:void(0);"><img src="images/sillohuette.png"
@@ -60,57 +60,24 @@
 			-->
 			<div class="comment-content">
 				<header>
-					<span class="title">{{title}}</span>
-					<a href="javascript:void(0);" class="userlink">{{postedBy.userName}}</a> - <span
-						class="pubdate">posted TODO time units ago</span>
+					<span class="title">{{message.title}}</span>
+          <!--<span class="title">ID {{message.id}} RepliesTo {{message.repliesTo}}</span>-->
+
+					<a href="javascript:void(0);" class="userlink">{{postedBy.username}}</a>
 					<input type="button" class="replyButton" value="reply"/>
+          <input type="button" class="closeButton" value="close"/><!--should only be top message-->
 				</header>
         {{#if attachment}}
           <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-            <img src="files/{{attachment.id}}{{attachment.extension}}"/>
+            <img src="files/{{attachment.id}}{{attachment.extension}}" width="500px"/>
           </a>
         {{/if}}
 				<p>
-					{{body}}
+					{{message.body}}
 				</p>
 			</div>
-			<ul class="replies categorizeus{{id}}">
+			<ul class="replies categorizeus{{message.id}}">
 			</ul>
-		</div>
-	</script>
-
-  <!--A comment, including the original post, any changes made here must also be made above -->
-	<script id="tmplFullMessage" type="text/x-handlebars-template"><!--figure out partials here to avoid dupes-->
-		<div class="fullMessage categorizeus{{id}} discussion" id="{{id}}">
-			<div class="commentsContainer">
-				<div class="comment primary">
-					<!--
-					<div class="avatar">
-						<a href="javascript:void(0);"><img src="images/sillohuette.png"
-							width="55" height="55" alt="{{postedBy.userName}} avatar"></a>
-					</div>
-					-->
-					<div class="comment-content">
-						<header>
-							<span class="title">{{title}}</span>
-							<a href="javascript:void(0);" class="userlink">{{postedBy.userName}}</a> - <span
-								class="pubdate">posted TODO time units ago</span>
-							<input type="button" class="closeButton" value="close"/>
-							<input type="button" class="replyButton" value="reply"/>
-						</header>
-						{{#if attachment}}
-							<a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-	              <img src="files/{{attachment.id}}{{attachment.extension}}"/>
-							</a>
-						{{/if}}
-						<p>
-							{{body}}
-						</p>
-					</div>
-					<ul class="replies categorizeus{{id}}">
-					</ul>
-				</div>
-			</div>
 		</div>
 	</script>
 
