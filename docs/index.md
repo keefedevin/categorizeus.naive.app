@@ -8,7 +8,7 @@
 
 # Setup Instructions
 
-###Dependencies
+### Dependencies
 
 The following need to be installed : 
 
@@ -20,7 +20,7 @@ The following need to be installed :
 if in windows, make sure to configure git and text editors to all use unix style line endings (LF not CRLF). I configure git to checkout as is, commit with LF endings. 
 Maybe this setting? core.autocrlf=input. java can understand linux style directory separators now. 
 
-###Code Setup
+### Code Setup
 
 Checkout the projects
 
@@ -33,9 +33,9 @@ In eclipse, the easiest thing to do is import as maven projects, this will handl
 
 Outside of eclipse, run mvn install in the order listed above, so that dependencies make sense. 
 
-###Configuration
+### Configuration
 
-####Database Creation
+#### Database Creation
 
 postgres should be running in the background. Let's log into psql and make a user and create the database schema.
 Use whatever user and database you like. 
@@ -48,11 +48,11 @@ so we'll run:
   create user categorizeus with password 'password';
   grant all privileges on database categories to categorizeus;
   
-####Schema Setup
+#### Schema Setup
 
 Under categorizeus.naive/src/main/resources/sql/basic there is schema.sql and seed.sql, which will setup or reset the database after changes. 
 
-####Configuration 
+#### Configuration 
 
 Edit categorizeus.naive/src/main/resources/categorizeus.properties and configure the database connection metadata and a directory to store static files, FILE_BASE, which will be used for uploads. Please use an absolute path. 
 
