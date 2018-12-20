@@ -81,6 +81,8 @@ Remove the comment and put your username and password and you'll have a bootstra
 
 # Code Structure
 
+Current video walkthrough : https://youtu.be/5-Lfo_yRAtw
+
 1. git clone git@github.com:keefe/categorizeus.core.git
 
 This is the core REST API, implemented in jax-rs. There are 3 core classes:

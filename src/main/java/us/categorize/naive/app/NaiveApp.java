@@ -11,6 +11,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import us.categorize.Config;
 import us.categorize.Configuration;
+import us.categorize.model.User;
 import us.categorize.naive.NaiveMessageStore;
 import us.categorize.naive.NaiveUserStore;
 import us.categorize.naive.api.NaiveAuthorizer;
