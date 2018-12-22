@@ -37,12 +37,29 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>us.categorize.App</mainClass>
+									<mainClass>us.categorize.naive.app.NaiveApp</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>us.categorize.naive.app.NaiveApp</mainClass>
+					<arguments>
+					</arguments>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -91,7 +108,7 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.7.4</version>
 		</dependency>
-				<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-jetty-http -->
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-jetty-http -->
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-jetty-http</artifactId>
@@ -102,6 +119,6 @@
 			<artifactId>jersey-media-json-jackson</artifactId>
 			<version>2.27</version>
 		</dependency>
-		
+
 	</dependencies>
 </project>

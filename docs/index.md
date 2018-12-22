@@ -2,6 +2,7 @@
 * [Setup Instructions](#setup-instructions)
 * [Project Structure](#project-structure)
 * [UI Code Structure](#ui-code-structure)
+* [Running Standalone](#running-standalone)
 
 # Overview and Origins 
 
@@ -110,4 +111,12 @@ As the rest of this project, this is meant to be a simple implementation. A reac
 The overall structure is based on [handlebars](https://handlebarsjs.com/) templates. These are extremely simple client side templates for html. They're declared as script tags in index.html and then loaded into functions on initialization. I looked into the idea of storing them as separate html files and compiling them then, but it looks like the best solution for a production build would be to use their nodejs library to precompile them. 
 
 I'm not sure if jquery could be easily removed from the build, I think maybe it could. mainui.js contains the code to compile the templates and respond to actions from the UI and style is predictably in mainui.css
+
+# Running Standalone
+
+1. Follow Setup Instructions above
+2. Install [maven](https://maven.apache.org/download.cgi)
+3. go to categorizeus.naive.app
+4. run mvn exec:java
+5. the server is now up at localhost:8080 and categorizeus.naive.app/src/main/resources is served wit hot reload
 
