@@ -1,6 +1,7 @@
 * [Overview and Origins](#overview-and-origins)
 * [Setup Instructions](#setup-instructions)
-* [Code Structure](#code-structure)
+* [Project Structure](#project-structure)
+* [UI Code Structure](#ui-code-structure)
 
 # Overview and Origins 
 
@@ -79,7 +80,7 @@ Under categorizeus.naive.app, run with NaiveApp. Currently, the UI doesn't have 
 ```
 Remove the comment and put your username and password and you'll have a bootstrap user. In an OAuth implementation, this would be a whitelisted user as admin in the database, but that is to come. I'm also aware of the constant debate about hashing on the client side and then against on the server. I personally think it doesn't hurt and reduces a vector which could cause exposure of a password to another site. I would prefer not to think about plain text passwords in my codebases at all. 
 
-# Code Structure
+# Project Structure
 
 Current video walkthrough : https://youtu.be/5-Lfo_yRAtw
 
@@ -101,3 +102,12 @@ The users project should strictly be responsible for authentication. There will 
 4. git clone git@github.com:keefe/categorizeus.naive.app.git
 
 The app packages wire together all of the other packages. 
+
+# UI Code Structure
+
+As the rest of this project, this is meant to be a simple implementation. A react, angular etc implementation would be in different projects. There is categorizeus.js which is meant to just be the client for the REST API. The implementation is using nodejs style callbacks of the form cb(error, results). It's all global functions at the moment. 
+
+The overall structure is based on [handlebars](https://handlebarsjs.com/) templates. These are extremely simple client side templates for html. They're declared as script tags in index.html and then loaded into functions on initialization. I looked into the idea of storing them as separate html files and compiling them then, but it looks like the best solution for a production build would be to use their nodejs library to precompile them. 
+
+I'm not sure if jquery could be easily removed from the build, I think maybe it could. mainui.js contains the code to compile the templates and respond to actions from the UI and style is predictably in mainui.css
+
