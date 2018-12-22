@@ -63,13 +63,7 @@ var initialize = function(dontDoInitialSearch){
     		return;
 		}
 		var tags = $("#txtTagSearch").val();
-		var allTags = tags.split(" ");
-		var tagArray = [];
-		for(var i=0; i<allTags.length;i++){
-			if(allTags[i].length>0){
-				tagArray.push(allTags[i]);
-			}
-		}
+		var tagArray = stringToTags(tags);
 		tagSearchThread(tagArray, displayMessages);
 	});
 
@@ -88,15 +82,29 @@ var initialize = function(dontDoInitialSearch){
 	});
 }
 
-var tagSelectedMessages = function(){
-	var tags = $("#txtTagSearch").val();
-	var allTags = tags.split(" ");
+
+var stringToTagsByDelim = function(str, delim){
+	var allTags = str.split(delim);
 	var tagArray = [];
 	for(var i=0; i<allTags.length;i++){
-		if(allTags[i].length>0){
-			tagArray.push(allTags[i]);
+		var tag = allTags[i].trim();
+		if(tag.length>0){
+			tagArray.push(tag);
 		}
 	}
+	return tagArray;
+}
+
+var stringToTags = function(str){
+	var spaceTags = stringToTagsByDelim(str, " ");
+	var commaTags = stringToTagsByDelim(str, ",");
+	if(spaceTags.length>commaTags.length) return spaceTags;
+	return commaTags;
+}
+
+var tagSelectedMessages = function(){
+	var tags = $("#txtTagSearch").val();
+	var tagArray = stringToTags(tags);
 
 	var whichTagged = [];
 	$('.basicDocument.selected').each(function () {
@@ -112,14 +120,14 @@ var tagSelectedMessages = function(){
 		return;
 	}
 	tagMessages(tagArray, whichTagged,function(err, message){
-    $('.basicDocument.selected').toggleClass('selected');
-		tagSearchThread(lastTags, displayMessages);
-
-		if(err!=null){
-			$("#status").html(err);
-		}else{
-			$("#status").html("Tagged Messages Successfully");
-		}
+		    $('.basicDocument.selected').toggleClass('selected');
+			tagSearchThread(lastTags, displayMessages);
+	
+			if(err!=null){
+				$("#status").html(err);
+			}else{
+				$("#status").html("Tagged Messages Successfully");
+			}
 	});
 }
 
