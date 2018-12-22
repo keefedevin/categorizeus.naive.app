@@ -28,9 +28,18 @@ var tagMessage = function(messageId, tag, cb){
 	});
 }
 var tagMessages = function(tagArray, messageIdArray, cb){
+	var expectedCount = tagArray.length * messageIdArray.length;
+	var totalCount = 0;
+	
 	for(var messageId of messageIdArray){
 		for(var tag of tagArray){
-			tagMessage(messageId, tag);//callback hell, need to rewrite this to tag one, do next etc some async thing
+			tagMessage(messageId, tag, function(err, data){
+				totalCount++;
+				if(err) cb(err);
+				if(totalCount==expectedCount){
+					cb(null, data);//unclear what data to send
+				}
+			});//callback hell, need to rewrite this to tag one, do next etc some async thing
 		}
 	}
 };
