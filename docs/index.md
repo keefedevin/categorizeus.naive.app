@@ -3,6 +3,7 @@
 * [Project Structure](#project-structure)
 * [UI Code Structure](#ui-code-structure)
 * [Running Standalone](#running-standalone)
+* [Populating Data](#populating-data)
 
 # Overview and Origins 
 
@@ -38,7 +39,7 @@ Checkout the projects
 3. git clone git@github.com:keefe/categorizeus.naive.users.git
 4. git clone git@github.com:keefe/categorizeus.naive.app.git
 
-In eclipse, the easiest thing to do is import as maven projects, this will handle the depency relationships. The nice thing about using this plugin is that adding a dependency propagates through. If I'm not using private maven dependencies then often I prefer command line but this makes life a lot easier, making a change in one proejct and seeing it propagate to the next. 
+In eclipse, the easiest thing to do is import as maven projects, this will handle the depency relationships. The nice thing about using this plugin is that adding a dependency propagates through. If I'm not using private maven dependencies then often I prefer command line but this makes life a lot easier, making a change in one project and seeing it propagate to the next. 
 
 Outside of eclipse, run mvn install in the order listed above, so that dependencies make sense. 
 
@@ -119,4 +120,12 @@ I'm not sure if jquery could be easily removed from the build, I think maybe it 
 3. go to categorizeus.naive.app
 4. run mvn exec:java
 5. the server is now up at localhost:8080 and categorizeus.naive.app/src/main/resources is served wit hot reload
+
+# Populating Data
+
+accession : (noun) a new item added to an existing collection of books, paintings, or artifacts.
+
+There will eventually be a series of modules loading data from different sources from web scrapers to REST APIs to maybe even IoT. However, the first priority is to get a stable API running, but it's no fun making up test data, so let's load something. 
+
+I decided to use the reddit API as the domain is similar. Clone this repository https://github.com/keefe/categorizeus.naive.accession and PLEASE specify your user agent string in Reddit.java, then just configure and run mvn install on the other projects and run NaiveAccession, the bot will page through the subreddit and populate your local database with each word in the title and the subreddit as tags, with any image associated as the attachment. 
 
