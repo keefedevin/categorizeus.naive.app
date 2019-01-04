@@ -43,7 +43,7 @@ var tagMessages = function(tagArray, messageIdArray, cb){
 		}
 	}
 };
-
+/*
 var tagSearch = function(tagArray, cb){
 	var payload = {
 		tags:tagArray
@@ -63,12 +63,12 @@ var tagSearch = function(tagArray, cb){
 			cb(null, messages);
 		}
 	});
-};
+};*/
 
 var tagSearchThread = function(tagArray, cb){
 	lastTags = tagArray;
 	pageOn = 0;
-	pageSize = 10;
+	pageSize = 56;
 	tagSearchThreads(tagArray, cb);
 };
 

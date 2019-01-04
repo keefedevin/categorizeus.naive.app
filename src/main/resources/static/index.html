@@ -14,19 +14,22 @@
 	<script id="tmplBasicDocument" type="text/x-handlebars-template">
 		<div class="basicDocument categorizeus{{message.id}}" id="{{message.id}}">
 			<h1>{{message.title}}</h1>
-      {{#if attachment}}
-        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-          <img src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
-        </a>
-      {{/if}}
+			<div class="tagHolder">
+				{{#each tags}}
+					{{this}} 
+				{{/each}}
+			</div>
+	      {{#if attachment}}
+	      	<div class = "imageHolder">
+		        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
+		          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
+		        </a>
+	        </div>
+	      {{/if}}
 			<div class="postedBy">
 				posted by {{postedBy.username}}
 				<input type="button" class="viewButton" value="view"/>
 			</div>
-			Tags :
-			{{#each tags}}
-				{{this}},
-			{{/each}}
 			<div class="body">
 				{{message.body}}
 			</div>
@@ -51,32 +54,31 @@
   <!--A comment, not including the original post -->
 	<script id="tmplIndividualComment" type="text/x-handlebars-template"><!--figure out partials here to avoid dupes-->
 		<div class="comment categorizeus{{message.id}}">
-		<!--
-			<div class="avatar">
-				<a href="javascript:void(0);"><img src="images/sillohuette.png"
-					width="55" height="55" alt="{{postedBy.userName}} avatar"></a>
-			</div>
-			-->
 			<div class="comment-content">
 				<header>
-					<span class="title">{{message.title}}</span>
-          <!--<span class="title">ID {{message.id}} RepliesTo {{message.repliesTo}}</span>-->
-
-					<a href="javascript:void(0);" class="userlink">{{postedBy.username}}</a>
+					<p>{{message.title}}</p>
+					<div class="tagHolder">
+						{{#each tags}}
+							{{this}} 
+						{{/each}}
+					</div>
 					<input type="button" class="replyButton" value="reply"/>
-          <input type="button" class="closeButton" value="close"/><!--should only be top message-->
+          			<input type="button" class="closeButton" value="close"/>
 				</header>
-        {{#if attachment}}
-          <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-            <img src="files/{{attachment.id}}{{attachment.extension}}" width="500px"/>
-          </a>
-        {{/if}}
-				<p>
+			      {{#if attachment}}
+			      	<div>
+				        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
+				          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
+				        </a>
+			        </div>
+			      {{/if}}
+				<div class="postedBy">
+					posted by {{postedBy.username}}
+				</div>
+				<div class="body">
 					{{message.body}}
-				</p>
+				</div>
 			</div>
-			<ul class="replies categorizeus{{message.id}}">
-			</ul>
 		</div>
 	</script>
 
