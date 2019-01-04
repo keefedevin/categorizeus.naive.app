@@ -64,9 +64,11 @@ Under categorizeus.naive/src/main/resources/sql/basic there is schema.sql and se
 
 #### Configuration 
 
-Edit categorizeus.naive/src/main/resources/categorizeus.properties and configure the database connection metadata and a directory to store static files, FILE_BASE, which will be used for uploads. Please use an absolute path. 
+Edit categorizeus.naive/src/main/resources/categorizeus.properties and configure the database connection metadata and a directory to store static files, FILE_BASE, which will be used for uploads. Please use an absolute path. This directory should not be within the maven project, as a large number of files will cause issues with maven builds (copying GB of files each build).  
 
 In categorizeus.naive.app/src/main/resources/categorizeus.naive.properties configure this to be the absolute path of the html/javascript/css files for the UI, this is STATIC_DIR and should be <project base>/categorizeus.naive.app/src/main/resources/static
+
+Also, FILE_BASE must be copied from categorizeus.properties into categorizeus.naive.properties - this will be addressed in a future commit. Note that two separate static file context paths are configured in the jetty server. 
 
 ### Run the Code
 

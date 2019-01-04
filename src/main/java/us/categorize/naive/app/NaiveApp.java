@@ -42,10 +42,17 @@ public class NaiveApp {
                 
         ctx.setContextPath("/");
         String staticDir = properties.getProperty("STATIC_DIR");
+        String fileBase = properties.getProperty("FILE_BASE");
+
         System.out.println("Serving static from " + staticDir);
         ctx.setResourceBase(staticDir);
-        server.setHandler(ctx);
 
+        ServletHolder filesDir = new ServletHolder("files", DefaultServlet.class);
+        filesDir.setInitParameter("resourceBase",fileBase);
+        filesDir.setInitParameter("pathInfoOnly","true");
+        filesDir.setInitParameter("dirAllowed","true");
+        ctx.addServlet(filesDir, "/files/*");
+        
         ServletHolder serHol = ctx.addServlet(ServletContainer.class, "/v1/*");
         serHol.setInitOrder(1);
         serHol.setInitParameter("jersey.config.server.provider.packages", 
@@ -53,6 +60,7 @@ public class NaiveApp {
         serHol.setInitParameter("jersey.config.server.provider.classnames", 
                 "org.glassfish.jersey.media.multipart.MultiPartFeature");
         ctx.addServlet(DefaultServlet.class, "/");
+        server.setHandler(ctx);
         try {
             server.start();
             server.join();
