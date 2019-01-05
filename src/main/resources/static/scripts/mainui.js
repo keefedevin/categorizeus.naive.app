@@ -27,9 +27,12 @@ var initialize = function(dontDoInitialSearch){
 		console.log(user);
 		$(".userGreeting").html("Hi, "+user.username+"!");
 	});
-  if(!dontDoInitialSearch){
-  	tagSearchThread([], displayMessages);
-  }
+	  if(!dontDoInitialSearch){
+	  	tagSearchThread([], displayMessages);
+	  }
+	$('#signinButton').click(function() {
+		window.location.href = "/v1/auth/oauth/google";
+  	});
 	$("#btnShowLogin").click(function(){
 		if(currentUser==null){
 			console.log("Clicking Login Button");

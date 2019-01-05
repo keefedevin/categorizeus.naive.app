@@ -1,5 +1,7 @@
 package us.categorize.naive.app;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -23,11 +25,23 @@ public class NaiveApp {
 		Properties properties = new Properties();
 		InputStream input = NaiveApp.class.getResourceAsStream("/categorizeus.naive.properties");
 		properties.load(input);
+		Properties secretProperties = new Properties();
+		//TODO do something similar to this on all properties as default
+		String secretDir = System.getProperty("user.home") + File.separator + "projects" + File.separator + "secrets" + File.separator + "secrets.properties";
+		input = new FileInputStream(secretDir);
+		secretProperties.load(input);
+		
 		
 		Config config = Config.readRelativeConfig();
+		Configuration.instance().setGoogleClientId(secretProperties.getProperty("GOOGLE_CLIENT_ID"));
+		Configuration.instance().setGoogleClientSecret(secretProperties.getProperty("GOOGLE_CLIENT_SECRET"));
+		//TODO note the annoying ordering dependency here
 		Configuration.instance().setUserStore(new NaiveUserStore(config.getDatabaseConnection()));
 		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection(), Configuration.instance().getUserStore(), config.getFileBase()));
 		Configuration.instance().setAuthorizer(new NaiveAuthorizer(Configuration.instance().getUserStore()));
+		
+
+
 		
 		/*
 		User user = new User();
@@ -61,13 +75,13 @@ public class NaiveApp {
                 "org.glassfish.jersey.media.multipart.MultiPartFeature");
         ctx.addServlet(DefaultServlet.class, "/");
         server.setHandler(ctx);
+        
         try {
             server.start();
             server.join();
         } catch (Exception ex) {
            ex.printStackTrace();
         } finally {
-
             server.destroy();
         }
 	}
