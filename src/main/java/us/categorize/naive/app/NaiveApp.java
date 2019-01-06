@@ -1,7 +1,5 @@
 package us.categorize.naive.app;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -11,9 +9,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import us.categorize.Config;
-import us.categorize.Configuration;
-import us.categorize.model.User;
+import us.categorize.CategorizeUs;
 import us.categorize.naive.NaiveMessageStore;
 import us.categorize.naive.NaiveUserStore;
 import us.categorize.naive.api.NaiveAuthorizer;
@@ -23,25 +19,11 @@ public class NaiveApp {
 	public static void main(String[] args) throws Exception{
 		
 		Properties properties = new Properties();
-		InputStream input = NaiveApp.class.getResourceAsStream("/categorizeus.naive.properties");
+		InputStream input = NaiveApp.class.getResourceAsStream("/categorizeus.properties");
 		properties.load(input);
-		Properties secretProperties = new Properties();
-		//TODO do something similar to this on all properties as default
-		String secretDir = System.getProperty("user.home") + File.separator + "projects" + File.separator + "secrets" + File.separator + "secrets.properties";
-		input = new FileInputStream(secretDir);
-		secretProperties.load(input);
-		
-		
-		Config config = Config.readRelativeConfig();
-		Configuration.instance().setGoogleClientId(secretProperties.getProperty("GOOGLE_CLIENT_ID"));
-		Configuration.instance().setGoogleClientSecret(secretProperties.getProperty("GOOGLE_CLIENT_SECRET"));
-		//TODO note the annoying ordering dependency here
-		Configuration.instance().setUserStore(new NaiveUserStore(config.getDatabaseConnection()));
-		Configuration.instance().setMessageStore(new NaiveMessageStore(config.getDatabaseConnection(), Configuration.instance().getUserStore(), config.getFileBase()));
-		Configuration.instance().setAuthorizer(new NaiveAuthorizer(Configuration.instance().getUserStore()));
-		
-
-
+		//note overrideProperties and toLocal in Config, just load another properties files and override with these as desired
+		Config config = new Config(properties);
+		config.configureCategorizeUs();
 		
 		/*
 		User user = new User();
@@ -49,20 +31,17 @@ public class NaiveApp {
 		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("yourpassword")));
 		Configuration.instance().getUserStore().registerUser(user);
 		*/
-        Server server = new Server(8080);
+        Server server = new Server(config.getPort());
 
         ServletContextHandler ctx = 
                 new ServletContextHandler(ServletContextHandler.SESSIONS);
                 
         ctx.setContextPath("/");
-        String staticDir = properties.getProperty("STATIC_DIR");
-        String fileBase = properties.getProperty("FILE_BASE");
-
-        System.out.println("Serving static from " + staticDir);
-        ctx.setResourceBase(staticDir);
+        System.out.println("Serving static from " + config.getStaticDir());
+        ctx.setResourceBase(config.getStaticDir());
 
         ServletHolder filesDir = new ServletHolder("files", DefaultServlet.class);
-        filesDir.setInitParameter("resourceBase",fileBase);
+        filesDir.setInitParameter("resourceBase",config.getFileBase());
         filesDir.setInitParameter("pathInfoOnly","true");
         filesDir.setInitParameter("dirAllowed","true");
         ctx.addServlet(filesDir, "/files/*");

@@ -38,6 +38,7 @@ Checkout the projects
 2. git clone git@github.com:keefe/categorizeus.naive.git
 3. git clone git@github.com:keefe/categorizeus.naive.users.git
 4. git clone git@github.com:keefe/categorizeus.naive.app.git
+5. git clone git@github.com:keefe/categorizeus.naive.accession.git (optional)
 
 In eclipse, the easiest thing to do is import as maven projects, this will handle the depency relationships. The nice thing about using this plugin is that adding a dependency propagates through. If I'm not using private maven dependencies then often I prefer command line but this makes life a lot easier, making a change in one project and seeing it propagate to the next. 
 
@@ -64,11 +65,25 @@ Under categorizeus.naive/src/main/resources/sql/basic there is schema.sql and se
 
 #### Configuration 
 
-Edit categorizeus.naive/src/main/resources/categorizeus.properties and configure the database connection metadata and a directory to store static files, FILE_BASE, which will be used for uploads. Please use an absolute path. This directory should not be within the maven project, as a large number of files will cause issues with maven builds (copying GB of files each build).  
+1. For easy configuration, checkout all projects as siblings.
+2. For easiest configuration, checkout all projects in ~/projects/ (directory off home)
+3. Create a file ~/projects/secrets/secrets.properties and a files directory ~/projects/files
+4. Make sure that these properties are set in secrets.properties and any others you want to change. 
+DB_PASS=
+DB_NAME=
+DB_NAME=
+DB_PORT=
+5. For sign in with google to work, see [Google OAuth](https://developers.google.com/identity/protocols/OAuth2WebServer) and setup credentials. 
+Use this redirect url http://localhost:8080/v1/auth/oauthcb  and make sure it adds (press enter) Then specify these guys : 
 
-In categorizeus.naive.app/src/main/resources/categorizeus.naive.properties configure this to be the absolute path of the html/javascript/css files for the UI, this is STATIC_DIR and should be <project base>/categorizeus.naive.app/src/main/resources/static
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+6. Run NaiveAccession.java and populate some data
+7. Run NaiveApp.java and visit localhost:8080, you're done!
 
-Also, FILE_BASE must be copied from categorizeus.properties into categorizeus.naive.properties - this will be addressed in a future commit. Note that two separate static file context paths are configured in the jetty server. 
+In order to use the naive implementation, the naive.app is imported, as is done in the accession project. The primary configuration file is in categorizeus.naive.app/src/main/resources/categorizeus.properties , in order to avoid a tight coupling on any particular RDBMS implementation. All of the dependencies required are also configured in the pom.xml in this project. 
+
+In this approach, static files are stored in directories on disk. Specifying a linux style path e.g. ~/projects/foo and the config will turn it into a local style path. 
 
 ### Run the Code
 
@@ -82,7 +97,7 @@ Under categorizeus.naive.app, run with NaiveApp. Currently, the UI doesn't have 
 		Configuration.instance().getUserStore().registerUser(user);
 		*/
 ```
-Remove the comment and put your username and password and you'll have a bootstrap user. In an OAuth implementation, this would be a whitelisted user as admin in the database, but that is to come. I'm also aware of the constant debate about hashing on the client side and then against on the server. I personally think it doesn't hurt and reduces a vector which could cause exposure of a password to another site. I would prefer not to think about plain text passwords in my codebases at all. 
+Remove the comment and put your username and password and you'll have a bootstrap user. In an OAuth implementation, this would be a whitelisted user as admin in the database, but that is to come - right now any login with google is white listed. I'm also aware of the constant debate about hashing on the client side and then against on the server. I personally think it doesn't hurt and reduces a vector which could cause exposure of a password to another site. I would prefer not to think about plain text passwords in my codebases at all. 
 
 # Project Structure
 
