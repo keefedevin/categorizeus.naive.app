@@ -47,7 +47,7 @@ var tagMessages = function(tagArray, messageIdArray, cb){
 var tagSearchThread = function(tagArray, cb){
 	lastTags = tagArray;
 	pageOn = 0;
-	pageSize = 56;
+	pageSize = 20;
 	tagSearchThreads(tagArray, cb);
 };
 

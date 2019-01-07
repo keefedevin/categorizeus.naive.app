@@ -165,7 +165,7 @@
         order: 3;
     }
     .unseen {
-	display: none;
+		display: none !important;
     }
 
 
@@ -247,6 +247,10 @@
      }
      .stopButton {
        background: url('/images/stop.png') no-repeat left center;
+       background-size: 25px 25px;
+     }
+      .addTagButton {
+       background: url('/images/plus.png') no-repeat left center;
        background-size: 25px 25px;
      }
      .tagButton.selected {

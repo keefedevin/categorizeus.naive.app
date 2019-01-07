@@ -12,6 +12,7 @@ var currentThread;
 var currentMessages = null;
 var poll = false;
 var pollInterval = null;
+var tagShortcuts = [];
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
@@ -65,7 +66,8 @@ var initialize = function(dontDoInitialSearch){
 
 	$("#btnSearch").click(function(){
 		if(tagSelectMode){
-    		tagSelectedMessages();
+  			var tags = $("#txtTagSearch").val();
+    		tagSelectedMessages(tags);
     		return;
 		}
 		var tags = $("#txtTagSearch").val();
@@ -76,17 +78,37 @@ var initialize = function(dontDoInitialSearch){
 	$("#btnTag").click(function(){
 
 	    tagSelectMode = !tagSelectMode;
+	    $(".taggingStuff").toggleClass("unseen");
 	    $("#btnTag").toggleClass('selected');
 	    $(".basicDocument").toggleClass('selectable');
 	    if(tagSelectMode){
 	      $("#btnSearch").html("Apply Tag");
-	      Mousetrap.bind("1", tagSelectedMessages);
+	      Mousetrap.bind("1", function(){
+  			var tags = $("#txtTagSearch").val();
+			tagSelectedMessages(tags);			
+	      });
 	    }else{
 	      $(".basicDocument").removeClass('selected');
 	      Mousetrap.unbind("1");
+	      for(var i=0; i<tagShortcuts.length;i++){
+	      	Mousetrap.unbind((i+2)+"");
+	      }
+	      tagShortcuts = [];
+	      $("#tagPresets").empty();
 	      $("#btnSearch").html("Search");
 	    }
     	return;
+	});
+	$("#btnAddTag").click(function(){
+		var tags = $("#txtTagSearch").val();
+		var which = tagShortcuts.length+2;
+		tagShortcuts.push(tags);
+		$("#tagPresets").append("["+which+"]"+tags+"&nbsp;");
+		Mousetrap.bind(""+which, (function(tags){
+			return function(){
+				tagSelectedMessages(tags);			
+			}
+		})(tags));
 	});
 	
 	$("#btnPlay").click(function(){
@@ -125,8 +147,7 @@ var stringToTags = function(str){
 	return commaTags;
 }
 
-var tagSelectedMessages = function(){
-	var tags = $("#txtTagSearch").val();
+var tagSelectedMessages = function(tags){
 	var tagArray = stringToTags(tags);
 
 	var whichTagged = [];
