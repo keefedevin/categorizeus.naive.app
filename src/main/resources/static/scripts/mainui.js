@@ -80,11 +80,13 @@ var initialize = function(dontDoInitialSearch){
 	    $(".basicDocument").toggleClass('selectable');
 	    if(tagSelectMode){
 	      $("#btnSearch").html("Apply Tag");
+	      Mousetrap.bind("1", tagSelectedMessages);
 	    }else{
+	      $(".basicDocument").removeClass('selected');
+	      Mousetrap.unbind("1");
 	      $("#btnSearch").html("Search");
 	    }
     	return;
-
 	});
 	
 	$("#btnPlay").click(function(){
@@ -93,7 +95,7 @@ var initialize = function(dontDoInitialSearch){
 			$("#btnPlay").removeClass("playButton");
 			$("#btnPlay").addClass("stopButton");
 			pollInterval = setInterval(function(){
-					tagSearchThread(lastTags, displayMessages);
+					tagSearchThread(lastTags, updateMessages);
 				}, 3000);
 		}else {
 			$("#btnPlay").removeClass("stopButton");
@@ -142,7 +144,7 @@ var tagSelectedMessages = function(){
 	}
 	tagMessages(tagArray, whichTagged,function(err, message){
 		    $('.basicDocument.selected').toggleClass('selected');
-			tagSearchThread(lastTags, displayMessages);
+			//tagSearchThread(lastTags, displayMessages);
 	
 			if(err!=null){
 				$("#status").html(err);
@@ -197,6 +199,9 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 	);
 	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
 	var newMessageView = $("#content").find(qry);
+	if(tagSelectMode){
+		appliedTemplate.addClass("selectable");
+	}
 	newMessageView.find(".viewButton").click((function(message){
 		return function(event){
 			console.log("View button is clicked for " + message.message.id);
@@ -208,6 +213,18 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 	})(aMessage));
 };
 
+var updateMessages = function(err, messages){
+	for(var i = messages.length -1; i>=0; i--){
+		var aMessage = messages[i];
+		if(currentMessages.length==0 ||
+			aMessage.message.id > currentMessages[0].message.id){
+			currentMessages.unshift(aMessage);
+			var appliedTemplate = $(tmplBasicDocument(aMessage));
+			var newMessage = $("#content").prepend(appliedTemplate);
+			wireMessageSummary(aMessage, appliedTemplate);
+		}
+	}
+}
 
 var displayMessages = function(err, messages){
 	currentMessages = messages;
@@ -313,7 +330,7 @@ var dynamicEditSubmit = function(el, cb){
 		if(repliesToId!=null && repliesToId.length>0){
 			console.log("Posting a reply to " + repliesToId);
 		}
-    el.find(".basicDocumentEdit").prepend("<h1>Processing your new message, please wait......</h1>");
+    	el.find(".basicDocumentEdit").prepend("<h1>Processing your new message, please wait......</h1>");
 		if(isNew){
 			var newMessage = {
 				body:body,
@@ -348,6 +365,5 @@ var dynamicEditSubmit = function(el, cb){
 			$("#status").append("<p>Currently, editing existing docs not supported. Clear and try again.</p>");
 		}
 		el.empty();
-
 	};
 }
