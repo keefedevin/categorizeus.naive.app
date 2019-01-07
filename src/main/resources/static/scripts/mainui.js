@@ -118,7 +118,7 @@ var initialize = function(dontDoInitialSearch){
 			$("#btnPlay").addClass("stopButton");
 			pollInterval = setInterval(function(){
 					tagSearchThread(lastTags, updateMessages);
-				}, 3000);
+				}, 1000);
 		}else {
 			$("#btnPlay").removeClass("stopButton");
 			$("#btnPlay").addClass("playButton");	
@@ -235,6 +235,10 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 };
 
 var updateMessages = function(err, messages){
+	if(currentMessages.length>100){
+		displayMessages(null, messages);
+		return;
+	}
 	for(var i = messages.length -1; i>=0; i--){
 		var aMessage = messages[i];
 		if(currentMessages.length==0 ||
