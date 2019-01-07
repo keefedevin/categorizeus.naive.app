@@ -3,18 +3,12 @@
 	<script src="scripts/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="scripts/handlebars-v4.0.12.js"></script>
 	<script type="text/javascript" src="scripts/categorizeus.js"></script>
+	<script type="text/javascript" src="scripts/mousetrap.min.js"></script>
 	<script type="text/javascript" src="scripts/mainui.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/mainui.css"></script>
   <script type="text/javascript">
     $(document).ready(function(){
-		initialize(); 
-
-	/*
-     function refresh() {
-             window.location.reload(true);
-     }
-
-     setTimeout(refresh, 3000);*/     
+		initialize();      
     });
   </script>
   <!-- This is the template for the items in the main grid view-->
@@ -75,7 +69,7 @@
 			      {{#if attachment}}
 			      	<div>
 				        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-				          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
+				          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="600px"/>
 				        </a>
 			        </div>
 			      {{/if}}
@@ -119,8 +113,12 @@
       <div class="mainNavItems">
       	<div id="btnCategorizeUs" class="navItem categorizeUsButton">categorize.us</div>
         <input id="txtTagSearch" class="tagText" type="text" placeholder="Tags to Search or Click Tag to Change Mode" width=200/>
+      	<span id="tagShortcut" class="taggingStuff unseen">[1]</span>
       	<div id="btnSearch" class="navItem searchButton">Search</div>
+      	<div id="btnPlay" class="navItem playButton">&nbsp;</div>
       	<div id="btnTag" class="navItem tagButton">Tag Mode</div>
+      	<div id="btnAddTag" class="navItem addTagButton taggingStuff unseen">&nbsp;</div>
+		<span id="tagPresets" class="taggingStuff unseen"></span>
       </div>
       <div class="personalNavItems">
       	<div id="btnPost" class="navItem postButton">Post</div>
@@ -156,6 +154,9 @@
       	envelope by David Nesbitt<br/>
       	about by Umesh Vgl<br/>
       	edit by abhishek rana <br/>
+      	play by hayatstudio10 <br/>
+      	Stop by Jake Dunham <br/>
+      	Plus by creative outlet <br/>
       </div>
     </div>
   </body>

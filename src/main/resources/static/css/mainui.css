@@ -165,7 +165,7 @@
         order: 3;
     }
     .unseen {
-	display: none;
+		display: none !important;
     }
 
 
@@ -240,7 +240,18 @@
      .tagButton {
        background: url('/images/tag.png') no-repeat left center;
        background-size: 25px 25px;
-
+     }
+     .playButton {
+       background: url('/images/play.png') no-repeat left center;
+       background-size: 25px 25px;
+     }
+     .stopButton {
+       background: url('/images/stop.png') no-repeat left center;
+       background-size: 25px 25px;
+     }
+      .addTagButton {
+       background: url('/images/plus.png') no-repeat left center;
+       background-size: 25px 25px;
      }
      .tagButton.selected {
        border: 3px solid black;

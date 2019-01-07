@@ -9,6 +9,10 @@ var tmplNavigation;
 var currentUser = null;
 var tagSelectMode = false;
 var currentThread;
+var currentMessages = null;
+var poll = false;
+var pollInterval = null;
+var tagShortcuts = [];
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
@@ -62,7 +66,8 @@ var initialize = function(dontDoInitialSearch){
 
 	$("#btnSearch").click(function(){
 		if(tagSelectMode){
-    		tagSelectedMessages();
+  			var tags = $("#txtTagSearch").val();
+    		tagSelectedMessages(tags);
     		return;
 		}
 		var tags = $("#txtTagSearch").val();
@@ -73,15 +78,52 @@ var initialize = function(dontDoInitialSearch){
 	$("#btnTag").click(function(){
 
 	    tagSelectMode = !tagSelectMode;
+	    $(".taggingStuff").toggleClass("unseen");
 	    $("#btnTag").toggleClass('selected');
 	    $(".basicDocument").toggleClass('selectable');
 	    if(tagSelectMode){
 	      $("#btnSearch").html("Apply Tag");
+	      Mousetrap.bind("1", function(){
+  			var tags = $("#txtTagSearch").val();
+			tagSelectedMessages(tags);			
+	      });
 	    }else{
+	      $(".basicDocument").removeClass('selected');
+	      Mousetrap.unbind("1");
+	      for(var i=0; i<tagShortcuts.length;i++){
+	      	Mousetrap.unbind((i+2)+"");
+	      }
+	      tagShortcuts = [];
+	      $("#tagPresets").empty();
 	      $("#btnSearch").html("Search");
 	    }
     	return;
-
+	});
+	$("#btnAddTag").click(function(){
+		var tags = $("#txtTagSearch").val();
+		var which = tagShortcuts.length+2;
+		tagShortcuts.push(tags);
+		$("#tagPresets").append("["+which+"]"+tags+"&nbsp;");
+		Mousetrap.bind(""+which, (function(tags){
+			return function(){
+				tagSelectedMessages(tags);			
+			}
+		})(tags));
+	});
+	
+	$("#btnPlay").click(function(){
+		poll = !poll;
+		if(poll){
+			$("#btnPlay").removeClass("playButton");
+			$("#btnPlay").addClass("stopButton");
+			pollInterval = setInterval(function(){
+					tagSearchThread(lastTags, updateMessages);
+				}, 1000);
+		}else {
+			$("#btnPlay").removeClass("stopButton");
+			$("#btnPlay").addClass("playButton");	
+			clearInterval(pollInterval);	
+		}
 	});
 }
 
@@ -105,8 +147,7 @@ var stringToTags = function(str){
 	return commaTags;
 }
 
-var tagSelectedMessages = function(){
-	var tags = $("#txtTagSearch").val();
+var tagSelectedMessages = function(tags){
 	var tagArray = stringToTags(tags);
 
 	var whichTagged = [];
@@ -124,7 +165,7 @@ var tagSelectedMessages = function(){
 	}
 	tagMessages(tagArray, whichTagged,function(err, message){
 		    $('.basicDocument.selected').toggleClass('selected');
-			tagSearchThread(lastTags, displayMessages);
+			//tagSearchThread(lastTags, displayMessages);
 	
 			if(err!=null){
 				$("#status").html(err);
@@ -161,7 +202,7 @@ var handleGridDocumentClick = function(event, template, message){
     //&& event.target.tagName != "IMG" && event.target.tagName != "INPUT"
 		console.log(message);
 		template.toggleClass('selected');
-    event.preventDefault();
+    	event.preventDefault();
 	}else{
 	  if(event.target.tagName == "IMG"){
 	    console.log("You clicked an image, way to go");
@@ -169,31 +210,55 @@ var handleGridDocumentClick = function(event, template, message){
 	  }
 	}
 }
+var wireMessageSummary = function(aMessage, appliedTemplate){
+	appliedTemplate.bind('click',
+	   (function(template, message){
+					return function(event){
+					      handleGridDocumentClick(event, template, message);
+					}
+	   })(appliedTemplate, aMessage)
+	);
+	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
+	var newMessageView = $("#content").find(qry);
+	if(tagSelectMode){
+		appliedTemplate.addClass("selectable");
+	}
+	newMessageView.find(".viewButton").click((function(message){
+		return function(event){
+			console.log("View button is clicked for " + message.message.id);
+			loadMessage(message.message.id, function(error, messageThread){
+				console.log(messageThread);
+				displayMessageThread(message, messageThread);
+			});
+		};
+	})(aMessage));
+};
+
+var updateMessages = function(err, messages){
+	if(currentMessages.length>100){
+		displayMessages(null, messages);
+		return;
+	}
+	for(var i = messages.length -1; i>=0; i--){
+		var aMessage = messages[i];
+		if(currentMessages.length==0 ||
+			aMessage.message.id > currentMessages[0].message.id){
+			currentMessages.unshift(aMessage);
+			var appliedTemplate = $(tmplBasicDocument(aMessage));
+			var newMessage = $("#content").prepend(appliedTemplate);
+			wireMessageSummary(aMessage, appliedTemplate);
+		}
+	}
+}
 
 var displayMessages = function(err, messages){
+	currentMessages = messages;
 	$("#content").empty();
 	for(var i=0; i<messages.length;i++){
-		var appliedTemplate = $(tmplBasicDocument(messages[i]));
+		var aMessage = messages[i];
+		var appliedTemplate = $(tmplBasicDocument(aMessage));
 		var newMessage = $("#content").append(appliedTemplate);
-
-		appliedTemplate.bind('click',
-		   (function(template, message){
-						return function(event){
-						      handleGridDocumentClick(event, template, message);
-						}
-		   })(appliedTemplate, messages[i])
-		);
-		var qry = ".basicDocument.categorizeus"+messages[i].message.id;
-		var newMessageView = $("#content").find(qry);
-		newMessageView.find(".viewButton").click((function(message){
-			return function(event){
-				console.log("View button is clicked for " + message.message.id);
-				loadMessage(message.message.id, function(error, messageThread){
-					console.log(messageThread);
-					displayMessageThread(message, messageThread);
-				});
-			};
-		})(messages[i]));
+		wireMessageSummary(aMessage, appliedTemplate);
 	}
 	$("#content").append($(tmplNavigation({})));
 	$("#content").find(".nextLink").click(function(event){
@@ -275,20 +340,6 @@ var dynamicLogin = function(el){
 	};
 }
 
-var dynamicRegister = function(el){
-	return function(){
-		var username = el.find(".txtUsername").val();
-		var password = el.find(".txtPassword").val();
-		registerUser(username, password,function(err, user){
-			if(err!=null){
-				$("#status").html("<h1>"+err+"</h1>");
-			}else{
-				$("#status").html("<h1>Registered successfully, welcome!</h1>");
-			}
-		});
-	};
-}
-
 var dynamicEditSubmit = function(el, cb){
 
 	return function(){
@@ -304,7 +355,7 @@ var dynamicEditSubmit = function(el, cb){
 		if(repliesToId!=null && repliesToId.length>0){
 			console.log("Posting a reply to " + repliesToId);
 		}
-    el.find(".basicDocumentEdit").prepend("<h1>Processing your new message, please wait......</h1>");
+    	el.find(".basicDocumentEdit").prepend("<h1>Processing your new message, please wait......</h1>");
 		if(isNew){
 			var newMessage = {
 				body:body,
@@ -339,6 +390,5 @@ var dynamicEditSubmit = function(el, cb){
 			$("#status").append("<p>Currently, editing existing docs not supported. Clear and try again.</p>");
 		}
 		el.empty();
-
 	};
 }
