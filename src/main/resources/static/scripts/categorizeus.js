@@ -6,7 +6,7 @@ There should be no UI specific code in this file, it should all be in callbacks.
 var deployPrefix = "/v1";
 var pageOn = 0;
 var pageSize = 10;
-var lastTags = null;
+var lastTags = [];
 
 var tagMessage = function(messageId, tag, cb){
 	$.ajax({
@@ -43,27 +43,6 @@ var tagMessages = function(tagArray, messageIdArray, cb){
 		}
 	}
 };
-/*
-var tagSearch = function(tagArray, cb){
-	var payload = {
-		tags:tagArray
-	};
-	$.ajax({
-		url:deployPrefix+'/tag/',
-		accepts:'application/json',
-		method:'POST',
-		contentType:"application/json",
-		data:JSON.stringify(payload)
-	}).done(function(messages, statusCode){
-		if(statusCode!='success'){
-			if(cb){
-				cb("Error doing tag search!");
-			}
-		}else if(cb){
-			cb(null, messages);
-		}
-	});
-};*/
 
 var tagSearchThread = function(tagArray, cb){
 	lastTags = tagArray;

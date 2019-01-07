@@ -3,12 +3,12 @@
 	<script src="scripts/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript" src="scripts/handlebars-v4.0.12.js"></script>
 	<script type="text/javascript" src="scripts/categorizeus.js"></script>
+	<script type="text/javascript" src="scripts/mousetrap.min.js"></script>
 	<script type="text/javascript" src="scripts/mainui.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/mainui.css"></script>
   <script type="text/javascript">
     $(document).ready(function(){
 		initialize(); 
-
 	/*
      function refresh() {
              window.location.reload(true);
@@ -75,7 +75,7 @@
 			      {{#if attachment}}
 			      	<div>
 				        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-				          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
+				          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="600px"/>
 				        </a>
 			        </div>
 			      {{/if}}
@@ -121,6 +121,8 @@
         <input id="txtTagSearch" class="tagText" type="text" placeholder="Tags to Search or Click Tag to Change Mode" width=200/>
       	<div id="btnSearch" class="navItem searchButton">Search</div>
       	<div id="btnTag" class="navItem tagButton">Tag Mode</div>
+      	<div id="btnPlay" class="navItem playButton">&nbsp;</div>
+
       </div>
       <div class="personalNavItems">
       	<div id="btnPost" class="navItem postButton">Post</div>
@@ -156,6 +158,8 @@
       	envelope by David Nesbitt<br/>
       	about by Umesh Vgl<br/>
       	edit by abhishek rana <br/>
+      	play by hayatstudio10 <br/>
+      	Stop by Jake Dunham <br/>
       </div>
     </div>
   </body>

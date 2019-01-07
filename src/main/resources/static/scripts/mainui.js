@@ -9,6 +9,9 @@ var tmplNavigation;
 var currentUser = null;
 var tagSelectMode = false;
 var currentThread;
+var currentMessages = null;
+var poll = false;
+var pollInterval = null;
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
@@ -82,6 +85,21 @@ var initialize = function(dontDoInitialSearch){
 	    }
     	return;
 
+	});
+	
+	$("#btnPlay").click(function(){
+		poll = !poll;
+		if(poll){
+			$("#btnPlay").removeClass("playButton");
+			$("#btnPlay").addClass("stopButton");
+			pollInterval = setInterval(function(){
+					tagSearchThread(lastTags, displayMessages);
+				}, 3000);
+		}else {
+			$("#btnPlay").removeClass("stopButton");
+			$("#btnPlay").addClass("playButton");	
+			clearInterval(pollInterval);	
+		}
 	});
 }
 
@@ -161,7 +179,7 @@ var handleGridDocumentClick = function(event, template, message){
     //&& event.target.tagName != "IMG" && event.target.tagName != "INPUT"
 		console.log(message);
 		template.toggleClass('selected');
-    event.preventDefault();
+    	event.preventDefault();
 	}else{
 	  if(event.target.tagName == "IMG"){
 	    console.log("You clicked an image, way to go");
@@ -169,31 +187,36 @@ var handleGridDocumentClick = function(event, template, message){
 	  }
 	}
 }
+var wireMessageSummary = function(aMessage, appliedTemplate){
+	appliedTemplate.bind('click',
+	   (function(template, message){
+					return function(event){
+					      handleGridDocumentClick(event, template, message);
+					}
+	   })(appliedTemplate, aMessage)
+	);
+	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
+	var newMessageView = $("#content").find(qry);
+	newMessageView.find(".viewButton").click((function(message){
+		return function(event){
+			console.log("View button is clicked for " + message.message.id);
+			loadMessage(message.message.id, function(error, messageThread){
+				console.log(messageThread);
+				displayMessageThread(message, messageThread);
+			});
+		};
+	})(aMessage));
+};
+
 
 var displayMessages = function(err, messages){
+	currentMessages = messages;
 	$("#content").empty();
 	for(var i=0; i<messages.length;i++){
-		var appliedTemplate = $(tmplBasicDocument(messages[i]));
+		var aMessage = messages[i];
+		var appliedTemplate = $(tmplBasicDocument(aMessage));
 		var newMessage = $("#content").append(appliedTemplate);
-
-		appliedTemplate.bind('click',
-		   (function(template, message){
-						return function(event){
-						      handleGridDocumentClick(event, template, message);
-						}
-		   })(appliedTemplate, messages[i])
-		);
-		var qry = ".basicDocument.categorizeus"+messages[i].message.id;
-		var newMessageView = $("#content").find(qry);
-		newMessageView.find(".viewButton").click((function(message){
-			return function(event){
-				console.log("View button is clicked for " + message.message.id);
-				loadMessage(message.message.id, function(error, messageThread){
-					console.log(messageThread);
-					displayMessageThread(message, messageThread);
-				});
-			};
-		})(messages[i]));
+		wireMessageSummary(aMessage, appliedTemplate);
 	}
 	$("#content").append($(tmplNavigation({})));
 	$("#content").find(".nextLink").click(function(event){
@@ -271,20 +294,6 @@ var dynamicLogin = function(el){
     		$(".userGreeting").html("Hi, "+user.username+"!");
 			}
 			el.empty();
-		});
-	};
-}
-
-var dynamicRegister = function(el){
-	return function(){
-		var username = el.find(".txtUsername").val();
-		var password = el.find(".txtPassword").val();
-		registerUser(username, password,function(err, user){
-			if(err!=null){
-				$("#status").html("<h1>"+err+"</h1>");
-			}else{
-				$("#status").html("<h1>Registered successfully, welcome!</h1>");
-			}
 		});
 	};
 }
