@@ -118,7 +118,7 @@ var initialize = function(dontDoInitialSearch){
 			$("#btnPlay").addClass("stopButton");
 			pollInterval = setInterval(function(){
 					tagSearchThread(lastTags, updateMessages);
-				}, 1000);
+				}, 3000);
 		}else {
 			$("#btnPlay").removeClass("stopButton");
 			$("#btnPlay").addClass("playButton");	
@@ -241,8 +241,9 @@ var updateMessages = function(err, messages){
 	}
 	for(var i = messages.length -1; i>=0; i--){
 		var aMessage = messages[i];
+		//debugger;
 		if(currentMessages.length==0 ||
-			aMessage.message.id > currentMessages[0].message.id){
+			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
 			currentMessages.unshift(aMessage);
 			var appliedTemplate = $(tmplBasicDocument(aMessage));
 			var newMessage = $("#content").prepend(appliedTemplate);
