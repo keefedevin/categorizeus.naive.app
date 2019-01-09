@@ -7,6 +7,8 @@
 
 # Overview and Origins 
 
+[Setup and Demo Video](https://youtu.be/kqASeMakYQw)
+
 Note, this project is currently in a rough draft state. In the end, hopefully this will be suitable at least for teaching REST API development in java, as there are many basic concepts that are touched upon. This is still in a very rough state at least another week is needed for a decent demo but it does run. 
 
 This project in one sense is a basic forum where users post messages that are organized by tags. This simple structure is pervasive across the web today. I believe there is something fundamental about this structure. From a certain [neurocognitive lingustic](http://www.ruf.rice.edu/~lngbrain/nonframe.htm) point of view, our brain forms categories as a fundamental unit of cognition and communication. There are similar concepts related to class membership in [semantic web](https://github.com/JoshData/rdfabout/blob/gh-pages/intro-to-rdf.md) technologies. This field of study was advanced by [Tim Berners-Lee](https://www.w3.org/People/Berners-Lee/) founder of the web. It is interesting to note that a "user" need not be a human being, but could be a machine learning algorithm - imagine a bot loading a book and then having a SentimentAnalysisBot that would reply with what it thought was the appropriate tags etc. Tags are the generalizations of members and replies are the process of some sort of intelligence or algorithm parsing a message. 
