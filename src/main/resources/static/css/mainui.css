@@ -29,7 +29,10 @@
        margin: 6px;
      }
      .basicDocument.selectable:hover {
-       border: 1px solid black;
+       /*border: 1px solid black;*/
+     }
+     .basicDocument.candidate {
+     	border: 3px solid blue;
      }
 
     .basicDocument.selected {
