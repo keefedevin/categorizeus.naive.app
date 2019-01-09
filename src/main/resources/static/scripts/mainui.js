@@ -121,7 +121,7 @@ var initialize = function(dontDoInitialSearch){
 			$("#btnPlay").addClass("stopButton");
 			pollInterval = setInterval(function(){
 					tagSearchThread(lastTags, updateMessages);
-				}, 3000);
+				}, 5000);
 		}else {
 			$("#btnPlay").removeClass("stopButton");
 			$("#btnPlay").addClass("playButton");	
