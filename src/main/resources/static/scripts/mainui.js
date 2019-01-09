@@ -10,6 +10,7 @@ var currentUser = null;
 var tagSelectMode = false;
 var currentThread;
 var currentMessages = null;
+var id2messages = {};
 var poll = false;
 var pollInterval = null;
 var tagShortcuts = [];
@@ -28,6 +29,7 @@ var initialize = function(dontDoInitialSearch){
 		}
 		currentUser = user;
 		$("#btnShowLogin").prop("value", "logout");
+		$("#signinButton").hide();
 		console.log(user);
 		$(".userGreeting").html("Hi, "+user.username+"!");
 	});
@@ -49,9 +51,9 @@ var initialize = function(dontDoInitialSearch){
 				}
 				currentUser = null;
 				$("#btnShowLogin").prop("value", "login");
+				$("#signinButton").show();
 				$(".userGreeting").html("");
 			});
-
 		}
 	});
 	$("#btnPost").click(function(){
@@ -118,7 +120,7 @@ var initialize = function(dontDoInitialSearch){
 			$("#btnPlay").addClass("stopButton");
 			pollInterval = setInterval(function(){
 					tagSearchThread(lastTags, updateMessages);
-				}, 3000);
+				}, 5000);
 		}else {
 			$("#btnPlay").removeClass("stopButton");
 			$("#btnPlay").addClass("playButton");	
@@ -149,9 +151,11 @@ var stringToTags = function(str){
 
 var tagSelectedMessages = function(tags){
 	var tagArray = stringToTags(tags);
-
 	var whichTagged = [];
 	$('.basicDocument.selected').each(function () {
+		whichTagged.push(this.id);
+	});
+	$('.basicDocument.candidate').each(function () {
 		whichTagged.push(this.id);
 	});
 
@@ -165,8 +169,22 @@ var tagSelectedMessages = function(tags){
 	}
 	tagMessages(tagArray, whichTagged,function(err, message){
 		    $('.basicDocument.selected').toggleClass('selected');
+		    $('.basicDocument.candidate').toggleClass('candidate');
+		    
 			//tagSearchThread(lastTags, displayMessages);
-	
+			for(var i=0; i<whichTagged.length;i++){
+				var aMessage = id2messages[whichTagged[i]];
+				for(var j=0; j<tagArray.length;j++){
+					if(!aMessage.tags.includes(tagArray[j])){
+						aMessage.tags.push(tagArray[j]);					
+					}
+				}
+				var selector = ".categorizeus" + whichTagged[i];
+				//debugger
+				var appliedTemplate = $(tmplBasicDocument(aMessage));
+				$(selector).replaceWith(appliedTemplate);
+				wireMessageSummary(aMessage, appliedTemplate);
+			}
 			if(err!=null){
 				$("#status").html(err);
 			}else{
@@ -218,11 +236,18 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 					}
 	   })(appliedTemplate, aMessage)
 	);
+	
+
+	
 	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
 	var newMessageView = $("#content").find(qry);
-	if(tagSelectMode){
-		appliedTemplate.addClass("selectable");
-	}
+	appliedTemplate.hover(function(){
+			if(tagSelectMode){
+				appliedTemplate.addClass("candidate");			
+			}
+		}, function(){
+			appliedTemplate.removeClass("candidate");	
+	});
 	newMessageView.find(".viewButton").click((function(message){
 		return function(event){
 			console.log("View button is clicked for " + message.message.id);
@@ -235,15 +260,16 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 };
 
 var updateMessages = function(err, messages){
-	if(currentMessages.length>100){
+	/*if(currentMessages.length>100){
 		displayMessages(null, messages);
 		return;
-	}
+	}*/
 	for(var i = messages.length -1; i>=0; i--){
 		var aMessage = messages[i];
 		//debugger;
 		if(currentMessages.length==0 ||
 			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
+			id2messages[aMessage.message.id] = aMessage;
 			currentMessages.unshift(aMessage);
 			var appliedTemplate = $(tmplBasicDocument(aMessage));
 			var newMessage = $("#content").prepend(appliedTemplate);
@@ -254,9 +280,11 @@ var updateMessages = function(err, messages){
 
 var displayMessages = function(err, messages){
 	currentMessages = messages;
+	id2messages = {};
 	$("#content").empty();
 	for(var i=0; i<messages.length;i++){
 		var aMessage = messages[i];
+		id2messages[aMessage.message.id] = aMessage;
 		var appliedTemplate = $(tmplBasicDocument(aMessage));
 		var newMessage = $("#content").append(appliedTemplate);
 		wireMessageSummary(aMessage, appliedTemplate);
