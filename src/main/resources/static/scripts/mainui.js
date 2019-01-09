@@ -54,7 +54,6 @@ var initialize = function(dontDoInitialSearch){
 				$("#signinButton").show();
 				$(".userGreeting").html("");
 			});
-
 		}
 	});
 	$("#btnPost").click(function(){
