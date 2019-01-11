@@ -4,6 +4,7 @@ var tmplLogin;
 var tmplRegister;
 var tmplIndividualComment;
 var tmplNavigation;
+var tmplSettings;
 
 
 var currentUser = null;
@@ -14,6 +15,14 @@ var id2messages = {};
 var poll = false;
 var pollInterval = null;
 var tagShortcuts = [];
+var pendingUpdates = [];
+var updateTimer;
+
+var settings = {
+	pollRate : 5000,
+	updateBatchSize : 5,
+	uiUpdateRate : 2000
+};
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
@@ -21,6 +30,7 @@ var initialize = function(dontDoInitialSearch){
 	tmplLogin = Handlebars.compile($("#tmplLogin").html());
 	tmplIndividualComment = Handlebars.compile($("#tmplIndividualComment").html());
 	tmplNavigation= Handlebars.compile($("#tmplNavigation").html());
+	tmplSettings= Handlebars.compile($("#tmplSettings").html()); 
 	fetchCurrentUser(function(err, user){
 		if(err!=null){
 			console.log("Nobody is logged in");
@@ -55,6 +65,25 @@ var initialize = function(dontDoInitialSearch){
 				$(".userGreeting").html("");
 			});
 		}
+	});
+	$("#btnCategorizeUs").click(function(){
+		var controls = $("#editor").html(tmplSettings(settings));
+		controls.find(".btnSaveSettings").click(function(){
+			var pollRate = parseInt(controls.find(".txtPollRate").val());
+			console.log("Poll Rate Read as " + pollRate);
+			settings.pollRate = pollRate;
+			settings.updateBatchSize =  parseInt(controls.find(".txtUpdateBatchSize").val());
+			settings.uiUpdateRate =  parseInt(controls.find(".txtUpdateRate").val());
+			
+			if(poll){
+				stopPolling();
+				startPolling();
+			}
+			controls.empty();
+		});
+		controls.find(".closeButton").click(function(){
+			controls.empty();
+		});
 	});
 	$("#btnPost").click(function(){
 		if(currentUser==null){
@@ -116,18 +145,27 @@ var initialize = function(dontDoInitialSearch){
 	$("#btnPlay").click(function(){
 		poll = !poll;
 		if(poll){
-			$("#btnPlay").removeClass("playButton");
-			$("#btnPlay").addClass("stopButton");
-			pollInterval = setInterval(function(){
-					tagSearchThread(lastTags, updateMessages);
-				}, 5000);
+			startPolling();
 		}else {
-			$("#btnPlay").removeClass("stopButton");
-			$("#btnPlay").addClass("playButton");	
-			clearInterval(pollInterval);	
+			stopPolling();
 		}
 	});
 }
+var startPolling = function(){
+	$("#btnPlay").removeClass("playButton");
+	$("#btnPlay").addClass("stopButton");
+	pollInterval = setInterval(function(){
+			tagSearchThread(lastTags, updateMessages);
+	}, settings.pollRate);
+	addMessageUpdate();
+};
+
+var stopPolling = function(){
+	$("#btnPlay").removeClass("stopButton");
+	$("#btnPlay").addClass("playButton");	
+	clearInterval(pollInterval);
+	clearTimeout(updateTimer);
+};
 
 
 var stringToTagsByDelim = function(str, delim){
@@ -259,21 +297,30 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 	})(aMessage));
 };
 
+var addMessageUpdate = function(){
+	var addedThisBatch = 0;
+	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
+		var aMessage = pendingUpdates.shift();
+		if(!id2messages[aMessage.message.id]){
+			addedThisBatch++;
+			id2messages[aMessage.message.id] = aMessage;
+			currentMessages.unshift(aMessage);
+			var appliedTemplate = $(tmplBasicDocument(aMessage));
+			var newMessage = $("#content").prepend(appliedTemplate);
+			wireMessageSummary(aMessage, appliedTemplate);	
+		}
+	}
+	console.log("Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
+	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
+};
+
 var updateMessages = function(err, messages){
-	/*if(currentMessages.length>100){
-		displayMessages(null, messages);
-		return;
-	}*/
 	for(var i = messages.length -1; i>=0; i--){
 		var aMessage = messages[i];
 		//debugger;
 		if(currentMessages.length==0 ||
 			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
-			id2messages[aMessage.message.id] = aMessage;
-			currentMessages.unshift(aMessage);
-			var appliedTemplate = $(tmplBasicDocument(aMessage));
-			var newMessage = $("#content").prepend(appliedTemplate);
-			wireMessageSummary(aMessage, appliedTemplate);
+			pendingUpdates.push(aMessage);//TODO dupes in here somehow?
 		}
 	}
 }
