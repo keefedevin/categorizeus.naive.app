@@ -8,6 +8,27 @@ var pageOn = 0;
 var pageSize = 10;
 var lastTags = [];
 
+
+var untagMessage = function(messageId, tag, cb){
+	$.ajax({
+		headers: {
+			Accept: "application/json; charset=utf-8"
+		},
+		url:deployPrefix+'/messages/'+messageId+"/tags/"+tag,
+		accepts:'application/json',
+		method:'DELETE',
+		contentType:"application/json"
+	}).done(function(message, statusCode){
+		if(cb){//TODO check for status code here?
+			cb(null, message);
+		}
+	}).fail(function(){
+		if(cb){
+			cb("Can't tag messages for some reason");
+		}
+	});
+}
+
 var tagMessage = function(messageId, tag, cb){
 	$.ajax({
 		headers: {
