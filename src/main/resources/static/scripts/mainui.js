@@ -118,6 +118,12 @@ var initialize = function(dontDoInitialSearch){
   			var tags = $("#txtTagSearch").val();
 			tagSelectedMessages(tags);			
 	      });
+	      /*
+  	      Mousetrap.bind(["command+shift+1","ctrl+shift+1"], function(){
+  			var tags = $("#txtTagSearch").val();
+			alert("remove tags " + tags);
+			//tagSelectedMessages(tags);			
+	      });*/
 	    }else{
 	      $(".basicDocument").removeClass('selected');
 	      Mousetrap.unbind("1");
@@ -348,13 +354,14 @@ var displayMessages = function(err, messages){
 var displayMessageThread = function(message, thread){
 	$("#content").empty();
 	currentMessage = message;
-
+	updateAttachmentLinks(message);
 	var id2message = {};
 	id2message[message.message.id] =  message;
 	for(var msg of thread){
 		id2message[msg.message.id] = msg;
 	}
 	for(var msg of thread){
+		updateAttachmentLinks(msg);
 		if(!id2message[msg.message.repliesTo].children){
 			id2message[msg.message.repliesTo].children = [];
 		}

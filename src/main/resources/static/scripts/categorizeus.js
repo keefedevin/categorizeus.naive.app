@@ -8,6 +8,27 @@ var pageOn = 0;
 var pageSize = 10;
 var lastTags = [];
 
+
+var untagMessage = function(messageId, tag, cb){
+	$.ajax({
+		headers: {
+			Accept: "application/json; charset=utf-8"
+		},
+		url:deployPrefix+'/messages/'+messageId+"/tags/"+tag,
+		accepts:'application/json',
+		method:'DELETE',
+		contentType:"application/json"
+	}).done(function(message, statusCode){
+		if(cb){//TODO check for status code here?
+			cb(null, message);
+		}
+	}).fail(function(){
+		if(cb){
+			cb("Can't tag messages for some reason");
+		}
+	});
+}
+
 var tagMessage = function(messageId, tag, cb){
 	$.ajax({
 		headers: {
@@ -64,10 +85,35 @@ var tagSearchThreads = function(tagArray, cb){
 				cb("Error doing tag search!");
 			}
 		}else if(cb){
+			for(var i=0; i<messages.length;i++){
+				updateAttachmentLinks(messages[i]);		
+			}
 			cb(null, messages);
 		}
 	});
 };
+/*
+TODO this needs to be thought through!
+*/
+var updateAttachmentLinks = function(message){
+	if(message.attachments){
+		for(var i=0; i<message.attachments.length;i++){
+			var attachment = message.attachments[i];
+			var attachmentLink = "files/" + attachment.id + attachment.extension;
+			//TODO ugh
+			if(attachment.filename.includes("small")){
+				message.thumbnailLink = attachmentLink;
+			}else{
+				message.attachmentLink = attachmentLink;
+			}
+		}
+		if(message.attachmentLink && !message.thumbnailLink){
+			message.thumbnailLink = message.attachmentLink;
+		}
+	}
+	console.log(message);
+};
+
 var nextPage = function(cb){
 	pageOn++;
 	tagSearchThreads(lastTags,cb);

@@ -20,10 +20,10 @@
 					{{this}} 
 				{{/each}}
 			</div>
-	      {{#if attachment}}
+	      {{#if attachmentLink}}
 	      	<div class = "imageHolder">
-		        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-		          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="200px"/>
+		        <a href="{{attachmentLink}}" target="_blank">
+		          <img class = "gridImage" src="{{thumbnailLink}}" height="200px"/>
 		        </a>
 	        </div>
 	      {{/if}}
@@ -66,10 +66,10 @@
 					<input type="button" class="replyButton" value="reply"/>
           			<input type="button" class="closeButton" value="close"/>
 				</header>
-			      {{#if attachment}}
-			      	<div>
-				        <a href="files/{{attachment.id}}{{attachment.extension}}" target="_blank">
-				          <img class = "gridImage" src="files/{{attachment.id}}{{attachment.extension}}" height="600px"/>
+	      	      {{#if attachmentLink}}
+			      	<div class = "imageHolder">
+				        <a href="{{attachmentLink}}" target="_blank">
+				          <img class = "gridImage" src="{{attachmentLink}}" height="600px"/>
 				        </a>
 			        </div>
 			      {{/if}}
