@@ -64,10 +64,35 @@ var tagSearchThreads = function(tagArray, cb){
 				cb("Error doing tag search!");
 			}
 		}else if(cb){
+			for(var i=0; i<messages.length;i++){
+				updateAttachmentLinks(messages[i]);		
+			}
 			cb(null, messages);
 		}
 	});
 };
+/*
+TODO this needs to be thought through!
+*/
+var updateAttachmentLinks = function(message){
+	if(message.attachments){
+		for(var i=0; i<message.attachments.length;i++){
+			var attachment = message.attachments[i];
+			var attachmentLink = "files/" + attachment.id + attachment.extension;
+			//TODO ugh
+			if(attachment.filename.includes("small")){
+				message.thumbnailLink = attachmentLink;
+			}else{
+				message.attachmentLink = attachmentLink;
+			}
+		}
+		if(message.attachmentLink && !message.thumbnailLink){
+			message.thumbnailLink = message.attachmentLink;
+		}
+	}
+	console.log(message);
+};
+
 var nextPage = function(cb){
 	pageOn++;
 	tagSearchThreads(lastTags,cb);
