@@ -17,6 +17,8 @@ var pollInterval = null;
 var tagShortcuts = [];
 var pendingUpdates = [];
 var updateTimer;
+var totalMessages = 0;
+var messageResetCount = 1000;
 
 var settings = {
 	pollRate : 5000,
@@ -305,10 +307,25 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 
 var addMessageUpdate = function(){
 	var addedThisBatch = 0;
+	if(pendingUpdates.length < settings.updateBatchSize && totalMessages > messageResetCount){
+		updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
+		return;
+	}
+	if(totalMessages > messageResetCount){
+		var replacements = pendingUpdates;
+		pendingUpdates = [];
+		var tags = $("#txtTagSearch").val();
+		tagSelectedMessages(tags);
+		displayMessages(null, replacements);
+		updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
+		return;
+	}
+	
 	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
 		var aMessage = pendingUpdates.shift();
 		if(!id2messages[aMessage.message.id]){
 			addedThisBatch++;
+			totalMessages++;
 			id2messages[aMessage.message.id] = aMessage;
 			currentMessages.unshift(aMessage);
 			var appliedTemplate = $(tmplBasicDocument(aMessage));
@@ -334,8 +351,10 @@ var updateMessages = function(err, messages){
 var displayMessages = function(err, messages){
 	currentMessages = messages;
 	id2messages = {};
+	totalMessages = 0;
 	$("#content").empty();
 	for(var i=0; i<messages.length;i++){
+		totalMessages++;
 		var aMessage = messages[i];
 		id2messages[aMessage.message.id] = aMessage;
 		var appliedTemplate = $(tmplBasicDocument(aMessage));
