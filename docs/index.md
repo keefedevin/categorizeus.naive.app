@@ -5,9 +5,12 @@
 * [Running Standalone](#running-standalone)
 * [Populating Data](#populating-data)
 
-# Overview and Origins 
-
-[Setup and Demo Video](https://youtu.be/kqASeMakYQw)
+# Overview and Origins
+* [Playlist of Basics](https://www.youtube.com/watch?v=PxeW7f4ZTvI&list=PLprVzqMFJveX2ddTdRCQoFGWbMEvjBzU8) 10min 
+* [Introduction](https://youtu.be/PxeW7f4ZTvI) 1min
+* [Background Ideas](https://youtu.be/VUmccUuSdfE) 2min
+* [Feature Overview](https://youtu.be/sEeYSiujkhA) 6min
+* [Setup and Demo Video](https://youtu.be/kqASeMakYQw) 9min
 
 Note, this project is currently in a rough draft state. In the end, hopefully this will be suitable at least for teaching REST API development in java, as there are many basic concepts that are touched upon. This is still in a very rough state at least another week is needed for a decent demo but it does run. 
 
