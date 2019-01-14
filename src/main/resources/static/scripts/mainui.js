@@ -21,9 +21,9 @@ var totalMessages = 0;
 var messageResetCount = 100;
 
 var settings = {
-	pollRate : 5000,
-	updateBatchSize : 5,
-	uiUpdateRate : 2000
+	pollRate : 3000,
+	updateBatchSize : 1,
+	uiUpdateRate : 1500
 };
 
 var initialize = function(dontDoInitialSearch){
