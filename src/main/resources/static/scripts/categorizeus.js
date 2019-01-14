@@ -5,7 +5,7 @@ There should be no UI specific code in this file, it should all be in callbacks.
 //var deployPrefix = "https://ectiaevu68.execute-api.us-west-2.amazonaws.com/testing";
 var deployPrefix = "/v1";
 var pageOn = 0;
-var pageSize = 10;
+var pageSize = 50;
 var lastTags = [];
 
 

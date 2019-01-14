@@ -312,7 +312,7 @@ var addMessageUpdate = function(){
 		return;
 	}
 	if(totalMessages > messageResetCount){
-		var replacements = pendingUpdates;
+		var replacements = [];//with many many pending what do?
 		pendingUpdates = [];
 		var tags = $("#txtTagSearch").val();
 		tagSelectedMessages(tags);
