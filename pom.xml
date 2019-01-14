@@ -8,6 +8,13 @@
 	<version>0.1-SNAPSHOT</version>
 	<name>categorizeus.naive.app</name>
 	<url>http://maven.apache.org</url>
+	<properties>
+		<jetty.version>9.4.14.v20181114</jetty.version>
+		<categorizeus.version>0.1-SNAPSHOT</categorizeus.version>
+		<jackson.version>2.9.8</jackson.version>
+		<jersey.version>2.27</jersey.version>
+		<postgres.version>42.2.5</postgres.version>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -71,75 +78,75 @@
 		<dependency>
 			<groupId>us.categorize</groupId>
 			<artifactId>api</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${categorizeus.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>us.categorize</groupId>
 			<artifactId>naive</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${categorizeus.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>us.categorize</groupId>
 			<artifactId>naive.users</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${categorizeus.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.3.9.v20160517</version>
+			<version>${jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.3.9.v20160517</version>
+			<version>${jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
-			<version>9.3.9.v20160517</version>
+			<version>${jetty.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.7.4</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.7.4</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-jetty-http -->
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-jetty-http</artifactId>
-			<version>2.27</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>2.27</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-server -->
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>2.27</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-servlet-core -->
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet-core</artifactId>
-			<version>2.27</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
-			<version>2.27</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>9.4.1208.jre7</version>
+			<version>${postgres.version}</version>
 		</dependency>
 	</dependencies>
 </project>
