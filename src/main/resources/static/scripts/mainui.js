@@ -17,6 +17,8 @@ var pollInterval = null;
 var tagShortcuts = [];
 var pendingUpdates = [];
 var updateTimer;
+var totalMessages = 0;
+var messageResetCount = 100;
 
 var settings = {
 	pollRate : 5000,
@@ -305,10 +307,12 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 
 var addMessageUpdate = function(){
 	var addedThisBatch = 0;
+	
 	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
 		var aMessage = pendingUpdates.shift();
 		if(!id2messages[aMessage.message.id]){
 			addedThisBatch++;
+			totalMessages++;
 			id2messages[aMessage.message.id] = aMessage;
 			currentMessages.unshift(aMessage);
 			var appliedTemplate = $(tmplBasicDocument(aMessage));
@@ -316,7 +320,16 @@ var addMessageUpdate = function(){
 			wireMessageSummary(aMessage, appliedTemplate);	
 		}
 	}
-	console.log("Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
+	var thisManyTooMany = totalMessages - messageResetCount;
+	for(var i=0; i<thisManyTooMany;i++){
+		var staleMessage = currentMessages.pop();
+		var messageSelector = ".categorizeus"+staleMessage.message.id;
+		totalMessages--;
+		$(messageSelector).remove();
+	}
+	var messagesInFrame = $(".basicDocument").length;
+	
+	console.log("Total in grid " + messagesInFrame + "Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
 	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
 };
 
@@ -334,8 +347,10 @@ var updateMessages = function(err, messages){
 var displayMessages = function(err, messages){
 	currentMessages = messages;
 	id2messages = {};
+	totalMessages = 0;
 	$("#content").empty();
 	for(var i=0; i<messages.length;i++){
+		totalMessages++;
 		var aMessage = messages[i];
 		id2messages[aMessage.message.id] = aMessage;
 		var appliedTemplate = $(tmplBasicDocument(aMessage));
