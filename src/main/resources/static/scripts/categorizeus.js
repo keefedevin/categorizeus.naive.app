@@ -111,7 +111,7 @@ var updateAttachmentLinks = function(message){
 			message.thumbnailLink = message.attachmentLink;
 		}
 	}
-	console.log(message);
+	//console.log(message);
 };
 
 var nextPage = function(cb){

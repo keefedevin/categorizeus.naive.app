@@ -18,7 +18,7 @@ var tagShortcuts = [];
 var pendingUpdates = [];
 var updateTimer;
 var totalMessages = 0;
-var messageResetCount = 1000;
+var messageResetCount = 100;
 
 var settings = {
 	pollRate : 5000,
@@ -307,19 +307,6 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 
 var addMessageUpdate = function(){
 	var addedThisBatch = 0;
-	if(pendingUpdates.length < settings.updateBatchSize && totalMessages > messageResetCount){
-		updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
-		return;
-	}
-	if(totalMessages > messageResetCount){
-		var replacements = [];//with many many pending what do?
-		pendingUpdates = [];
-		var tags = $("#txtTagSearch").val();
-		tagSelectedMessages(tags);
-		displayMessages(null, replacements);
-		updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
-		return;
-	}
 	
 	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
 		var aMessage = pendingUpdates.shift();
@@ -333,7 +320,16 @@ var addMessageUpdate = function(){
 			wireMessageSummary(aMessage, appliedTemplate);	
 		}
 	}
-	console.log("Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
+	var thisManyTooMany = totalMessages - messageResetCount;
+	for(var i=0; i<thisManyTooMany;i++){
+		var staleMessage = currentMessages.pop();
+		var messageSelector = ".categorizeus"+staleMessage.message.id;
+		totalMessages--;
+		$(messageSelector).remove();
+	}
+	var messagesInFrame = $(".basicDocument").length;
+	
+	console.log("Total in grid " + messagesInFrame + "Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
 	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
 };
 
