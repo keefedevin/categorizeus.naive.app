@@ -25,6 +25,15 @@ var settings = {
 	updateBatchSize : 1,
 	uiUpdateRate : 1500
 };
+var query = {
+	tags : [],
+	loadMetadata : true,
+	after : null, 
+	before : null, 
+	count : 20,
+	sortBy : "desc"
+};
+var previousBounds = [];
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
@@ -46,7 +55,7 @@ var initialize = function(dontDoInitialSearch){
 		$(".userGreeting").html("Hi, "+user.username+"!");
 	});
 	  if(!dontDoInitialSearch){
-	  	tagSearchThread([], displayMessages);
+	  	tagSearchThread(query, displayMessages);
 	  }
 	$('#signinButton').click(function() {
 		window.location.href = "/v1/auth/oauth/google";
@@ -92,7 +101,7 @@ var initialize = function(dontDoInitialSearch){
 			displayLoginForm("#editor");
 		}else{
 			displayEditForm("#editor", {}, function(){
-				tagSearchThread(lastTags, displayMessages);
+				tagSearchThread(query, displayMessages);
 			});
 		}
 	});
@@ -105,7 +114,11 @@ var initialize = function(dontDoInitialSearch){
 		}
 		var tags = $("#txtTagSearch").val();
 		var tagArray = stringToTags(tags);
-		tagSearchThread(tagArray, displayMessages);
+		query.tags = tagArray;
+		query.before = null;
+		query.after = null;
+		previousBounds = [];
+		tagSearchThread(query, displayMessages);
 	});
 
 	$("#btnTag").click(function(){
@@ -163,7 +176,7 @@ var startPolling = function(){
 	$("#btnPlay").removeClass("playButton");
 	$("#btnPlay").addClass("stopButton");
 	pollInterval = setInterval(function(){
-			tagSearchThread(lastTags, updateMessages);
+			tagSearchThread(query, updateMessages);
 	}, settings.pollRate);
 	addMessageUpdate();
 };
@@ -349,6 +362,14 @@ var displayMessages = function(err, messages){
 	id2messages = {};
 	totalMessages = 0;
 	$("#content").empty();
+	if(messages.length!=0){
+		previousBounds.push(
+		{
+			from:messages[0].message.id,
+			to:messages[messages.length-1].message.id
+		}
+	);
+	}
 	for(var i=0; i<messages.length;i++){
 		totalMessages++;
 		var aMessage = messages[i];
@@ -365,6 +386,40 @@ var displayMessages = function(err, messages){
 		previousPage(displayMessages);
 	});
 };
+
+var nextPage = function(cb){
+	if(query.sortBy=="asc"){
+		query.after = null;
+		if(currentMessages!=null && currentMessages.length>0){
+			query.after = currentMessages[currentMessages.length-1].message.id;
+		}
+		query.before = null;
+	}else if(query.sortBy=="desc"){
+		query.after = null;
+		query.before = null;
+		if(currentMessages!=null && currentMessages.length>0){
+			query.before = currentMessages[currentMessages.length-1].message.id;
+		}
+	}
+	console.log(JSON.stringify(previousBounds));
+	tagSearchThread(query,cb);
+}
+var previousPage = function(cb){
+	if(previousBounds.length>1){
+		previousBounds.pop();
+		console.log(JSON.stringify(previousBounds));
+		var goalBounds = previousBounds.pop();//this is what the next one SHOULD be
+		query.after = null;
+		query.before = null;
+		if(previousBounds.length>0 && query.sortBy == "asc"){
+			query.after = previousBounds[previousBounds.length-1].to;
+		}
+		else if(previousBounds.length>0 && query.sortBy == "desc"){
+			query.before = previousBounds[previousBounds.length-1].to;
+		}
+		tagSearchThread(query,cb);
+	}
+}
 
 var displayMessageThread = function(message, thread){
 	$("#content").empty();
