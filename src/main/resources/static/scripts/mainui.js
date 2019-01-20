@@ -25,6 +25,15 @@ var settings = {
 	updateBatchSize : 1,
 	uiUpdateRate : 1500
 };
+var query = {
+	tags : [],
+	loadMetadata : true,
+	after : null, 
+	before : null, 
+	count : 20,
+	sortBy : "desc"
+};
+var previousBounds = [];
 
 var initialize = function(dontDoInitialSearch){
 	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
@@ -46,7 +55,7 @@ var initialize = function(dontDoInitialSearch){
 		$(".userGreeting").html("Hi, "+user.username+"!");
 	});
 	  if(!dontDoInitialSearch){
-	  	tagSearchThread([], displayMessages);
+	  	tagSearchThread(query, displayMessages);
 	  }
 	$('#signinButton').click(function() {
 		window.location.href = "/v1/auth/oauth/google";
@@ -92,7 +101,7 @@ var initialize = function(dontDoInitialSearch){
 			displayLoginForm("#editor");
 		}else{
 			displayEditForm("#editor", {}, function(){
-				tagSearchThread(lastTags, displayMessages);
+				tagSearchThread(query, displayMessages);
 			});
 		}
 	});
@@ -105,7 +114,11 @@ var initialize = function(dontDoInitialSearch){
 		}
 		var tags = $("#txtTagSearch").val();
 		var tagArray = stringToTags(tags);
-		tagSearchThread(tagArray, displayMessages);
+		query.tags = tagArray;
+		query.before = null;
+		query.after = null;
+		previousBounds = [];
+		tagSearchThread(query, displayMessages);
 	});
 
 	$("#btnTag").click(function(){
@@ -163,9 +176,35 @@ var startPolling = function(){
 	$("#btnPlay").removeClass("playButton");
 	$("#btnPlay").addClass("stopButton");
 	pollInterval = setInterval(function(){
-			tagSearchThread(lastTags, updateMessages);
+		checkForUpdates();
 	}, settings.pollRate);
 	addMessageUpdate();
+};
+
+var checkForUpdates = function(){
+	var updateQuery = {
+		tags : query.tags,
+		loadMetadata : true,
+		after : null, 
+		before : null, 
+		count : query.count,
+		sortBy : query.sortBy
+	};
+
+	if(query.sortBy=="desc" && currentMessages.length>0){
+		//this becomes complicated due to loading many pages server side before querying the next one
+		updateQuery.sortBy = "asc";
+		updateQuery.after = currentMessages[0].message.id;
+		if(pendingUpdates.length>0){
+			updateQuery.after = pendingUpdates[pendingUpdates.length-1].message.id;
+		}
+	}else if(query.sortBy=="asc" && currentMessages.length>0){//totally untested block!
+		query.after = currentMessages[currentMessages.length-1].message.id;//what does this block mean?
+		if(pendingUpdates.length>0){
+			updateQuery.after = pendingUpdates[pendingUpdates.length-1].message.id;
+		}
+	}
+	tagSearchThread(updateQuery, updateMessages);
 };
 
 var stopPolling = function(){
@@ -310,13 +349,19 @@ var addMessageUpdate = function(){
 	
 	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
 		var aMessage = pendingUpdates.shift();
+		console.log("Adding " + aMessage.message.id);
 		if(!id2messages[aMessage.message.id]){
 			addedThisBatch++;
 			totalMessages++;
 			id2messages[aMessage.message.id] = aMessage;
 			currentMessages.unshift(aMessage);
 			var appliedTemplate = $(tmplBasicDocument(aMessage));
-			var newMessage = $("#content").prepend(appliedTemplate);
+			var newMessage = null;
+			if(query.sortBy=="desc"){
+				newMessage = $("#content").prepend(appliedTemplate);
+			}else{
+				newMessage = $("#content").append(appliedTemplate);
+			}
 			wireMessageSummary(aMessage, appliedTemplate);	
 		}
 	}
@@ -334,14 +379,19 @@ var addMessageUpdate = function(){
 };
 
 var updateMessages = function(err, messages){
-	for(var i = messages.length -1; i>=0; i--){
+	var s = "";
+	for(var i = 0; i<messages.length; i++){
 		var aMessage = messages[i];
+		s = s + aMessage.message.id+",";
+		pendingUpdates.push(aMessage);
+		//TODO dupes in here somehow?
 		//debugger;
-		if(currentMessages.length==0 ||
+		/*if(currentMessages.length==0 ||
 			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
 			pendingUpdates.push(aMessage);//TODO dupes in here somehow?
-		}
+		}*/
 	}
+	console.log("Add these " + s);
 }
 
 var displayMessages = function(err, messages){
@@ -349,6 +399,14 @@ var displayMessages = function(err, messages){
 	id2messages = {};
 	totalMessages = 0;
 	$("#content").empty();
+	if(messages.length!=0){
+		previousBounds.push(
+		{
+			from:messages[0].message.id,
+			to:messages[messages.length-1].message.id
+		}
+	);
+	}
 	for(var i=0; i<messages.length;i++){
 		totalMessages++;
 		var aMessage = messages[i];
@@ -365,6 +423,40 @@ var displayMessages = function(err, messages){
 		previousPage(displayMessages);
 	});
 };
+
+var nextPage = function(cb){
+	if(query.sortBy=="asc"){
+		query.after = null;
+		if(currentMessages!=null && currentMessages.length>0){
+			query.after = currentMessages[currentMessages.length-1].message.id;
+		}
+		query.before = null;
+	}else if(query.sortBy=="desc"){
+		query.after = null;
+		query.before = null;
+		if(currentMessages!=null && currentMessages.length>0){
+			query.before = currentMessages[currentMessages.length-1].message.id;
+		}
+	}
+	console.log(JSON.stringify(previousBounds));
+	tagSearchThread(query,cb);
+}
+var previousPage = function(cb){
+	if(previousBounds.length>1){
+		previousBounds.pop();
+		console.log(JSON.stringify(previousBounds));
+		var goalBounds = previousBounds.pop();//this is what the next one SHOULD be
+		query.after = null;
+		query.before = null;
+		if(previousBounds.length>0 && query.sortBy == "asc"){
+			query.after = previousBounds[previousBounds.length-1].to;
+		}
+		else if(previousBounds.length>0 && query.sortBy == "desc"){
+			query.before = previousBounds[previousBounds.length-1].to;
+		}
+		tagSearchThread(query,cb);
+	}
+}
 
 var displayMessageThread = function(message, thread){
 	$("#content").empty();
@@ -404,8 +496,8 @@ var addComment = function(message, depth){
 	appliedTemplate.css("padding-left", leftPad+"px");
 	var newMessageView = $("#content").find(".categorizeus"+message.message.id);
 	newMessageView.find(".closeButton").click((function(message, messageView){
-			return function(event){
-				tagSearchThread(lastTags, displayMessages);
+			return function(event){//TODO this is completely wrong, review!
+				tagSearchThread(query, displayMessages);
 			};
 	})(message, newMessageView));
 	newMessageView.find(".replyButton").click((function(message, messageView){

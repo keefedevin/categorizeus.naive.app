@@ -6,8 +6,7 @@ There should be no UI specific code in this file, it should all be in callbacks.
 var deployPrefix = "/v1";
 var pageOn = 0;
 var pageSize = 50;
-var lastTags = [];
-
+var lastQuery = null;
 
 var untagMessage = function(messageId, tag, cb){
 	$.ajax({
@@ -65,19 +64,34 @@ var tagMessages = function(tagArray, messageIdArray, cb){
 	}
 };
 
-var tagSearchThread = function(tagArray, cb){
-	lastTags = tagArray;
-	pageOn = 0;
-	pageSize = 20;
-	tagSearchThreads(tagArray, cb);
-};
+var tagSearchThread = function(tagQuery, cb){
+	var queryURI = deployPrefix+'/messages?';
+	//loadMetadata=true&tags='+tagArray.join()+'&pageOn='+pageOn+'&pageSize='+pageSize;
+	lastQuery = tagQuery; 
+	if(tagQuery.loadMetadata){
+		queryURI = queryURI+'loadMetadata=true';
+	}
+	if(tagQuery.tags!=null && tagQuery.tags.length>0){
+		queryURI = queryURI+'&tags='+tagQuery.tags.join();
+	}
+	if(tagQuery.before!=null){
+		queryURI = queryURI+'&before='+tagQuery.before;
+	}
+	if(tagQuery.after!=null){
+		queryURI = queryURI+'&after='+tagQuery.after;
+	}
+	if(tagQuery.count!=null){
+		queryURI = queryURI+'&count='+tagQuery.count;
+	}
+	if(tagQuery.sortBy!=null){
+		queryURI = queryURI+'&sort='+tagQuery.sortBy;
+	}
 
-var tagSearchThreads = function(tagArray, cb){
 	$.ajax({
 		headers: {
 			Accept: "application/json; charset=utf-8"
 		},
-		url:deployPrefix+'/messages?loadMetadata=true&tags='+tagArray.join()+'&pageOn='+pageOn+'&pageSize='+pageSize,
+		url:queryURI,
 		method:'GET'
 	}).done(function(messages, statusCode){//TODO fail handler
 		if(statusCode!='success'){
@@ -85,9 +99,12 @@ var tagSearchThreads = function(tagArray, cb){
 				cb("Error doing tag search!");
 			}
 		}else if(cb){
+			var s = "";
 			for(var i=0; i<messages.length;i++){
+				s = s + messages[i].message.id+",";
 				updateAttachmentLinks(messages[i]);		
 			}
+			console.log(s);
 			cb(null, messages);
 		}
 	});
@@ -113,16 +130,6 @@ var updateAttachmentLinks = function(message){
 	}
 	//console.log(message);
 };
-
-var nextPage = function(cb){
-	pageOn++;
-	tagSearchThreads(lastTags,cb);
-}
-var previousPage = function(cb){
-	pageOn--;
-	if(pageOn<0) pageOn = 0;
-	tagSearchThreads(lastTags,cb);
-}
 
 var loadMessage = function(id, cb){
 	$.ajax({

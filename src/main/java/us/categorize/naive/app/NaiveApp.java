@@ -9,6 +9,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import io.swagger.v3.jaxrs2.integration.OpenApiServlet;
+
 public class NaiveApp {
 
 	public static void main(String[] args) throws Exception{
@@ -40,6 +42,11 @@ public class NaiveApp {
         filesDir.setInitParameter("pathInfoOnly","true");
         filesDir.setInitParameter("dirAllowed","true");
         ctx.addServlet(filesDir, "/files/*");
+        
+        ServletHolder openApi = new ServletHolder("openapi", OpenApiServlet.class);
+        openApi.setInitOrder(3);
+        openApi.setInitParameter("openApi.configuration.resourcePackages", "us.categorize.server,us.categorize.naive.users.server");
+        ctx.addServlet(openApi, "/openapi/*");
         
         ServletHolder serHol = ctx.addServlet(ServletContainer.class, "/v1/*");
         serHol.setInitOrder(1);
