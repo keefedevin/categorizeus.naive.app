@@ -1,0 +1,6 @@
+<div class="login">
+  <p>Username <input class="txtUsername" type="text"/></p>
+  <p>Password <input class="txtPassword" type="password"/></p>
+  <input type="button" class="btnLogin" value="Login"/>
+  <input type="button" class="closeButton" value="close"/>
+</div>

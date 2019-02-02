@@ -1,0 +1,12 @@
+<div class="searchNavigation">
+  <span class="previousNavigation">
+    <a href="javascript:void(0);" class="previousLink">
+      <span>previous</span>
+    </a>
+  </span>
+  <span class="nextNavigation">
+    <a href="javascript:void(0);" class="nextLink">
+      <span>next</span>
+    </a>
+  </span>
+</div>
