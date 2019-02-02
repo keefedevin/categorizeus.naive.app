@@ -63,13 +63,13 @@ var finishInitialize = function(dontDoInitialSearch){
 	$("#controlsPane").html(ui.templates["tmplControls"]({}));
 	displayUser(currentUser);
   if(!dontDoInitialSearch){
-  	ui.api.tagSearchThread(query, displayMessages);
+  	ui.search([], displayMessages);
   }
 	$('#signinButton').click(function() {
 		window.location.href = "/v1/auth/oauth/google";
 	});
 	$("#btnShowLogin").click(function(){
-		if(currentUser==null){
+		if(ui.user==null){
 			console.log("Clicking Login Button");
 			displayLoginForm("#editor");
 		}else{
@@ -78,7 +78,7 @@ var finishInitialize = function(dontDoInitialSearch){
 					$(".userGreeting").html("<h1> "+err+"</h1>");
 					return;
 				}
-				currentUser = null;
+				ui.user = null;//maybe this goes into a function on ui, dunno
 				$("#btnShowLogin").prop("value", "login");
 				$("#signinButton").show();
 				$(".userGreeting").html("");
@@ -86,16 +86,14 @@ var finishInitialize = function(dontDoInitialSearch){
 		}
 	});
 	$("#btnCategorizeUs").click(function(){
-		console.log("in button click");
-		var settingHtml = tmplSettings(settings);
-		console.log(settingHtml);
+		var settingHtml = ui.tmpl("tmplSettings",ui.settings);
 		var controls = $("#editor").html(settingHtml);
 		controls.find(".btnSaveSettings").click(function(){
 			var pollRate = parseInt(controls.find(".txtPollRate").val());
 			console.log("Poll Rate Read as " + pollRate);
-			settings.pollRate = pollRate;
-			settings.updateBatchSize =  parseInt(controls.find(".txtUpdateBatchSize").val());
-			settings.uiUpdateRate =  parseInt(controls.find(".txtUpdateRate").val());
+			ui.settings.pollRate = pollRate;
+			ui.settings.updateBatchSize =  parseInt(controls.find(".txtUpdateBatchSize").val());
+			ui.settings.uiUpdateRate =  parseInt(controls.find(".txtUpdateRate").val());
 
 			if(poll){
 				stopPolling();
@@ -112,7 +110,7 @@ var finishInitialize = function(dontDoInitialSearch){
 			displayLoginForm("#editor");
 		}else{
 			displayEditForm("#editor", {}, function(){
-				ui.api.tagSearchThread(query, displayMessages);
+				ui.searchByQuery(ui.query, displayMessages);
 			});
 		}
 	});
@@ -125,15 +123,10 @@ var finishInitialize = function(dontDoInitialSearch){
 		}
 		var tags = $("#txtTagSearch").val();
 		var tagArray = stringToTags(tags);
-		query.tags = tagArray;
-		query.before = null;
-		query.after = null;
-		previousBounds = [];
-		ui.api.tagSearchThread(query, displayMessages);
+		ui.search(tagArray, displayMessages);
 	});
 
 	$("#btnTag").click(function(){
-
 	    tagSelectMode = !tagSelectMode;
 	    $(".taggingStuff").toggleClass("unseen");
 	    $("#btnTag").toggleClass('selected');
@@ -142,8 +135,8 @@ var finishInitialize = function(dontDoInitialSearch){
 	      $("#btnSearch").html("Apply Tag");
 	      Mousetrap.bind("1", function(){
   			var tags = $("#txtTagSearch").val();
-			tagSelectedMessages(tags);
-	      });
+				tagSelectedMessages(tags);
+	    });
 	      /*
   	      Mousetrap.bind(["command+shift+1","ctrl+shift+1"], function(){
   			var tags = $("#txtTagSearch").val();
@@ -200,29 +193,7 @@ var displayUser = function(user){
 	}
 }
 var checkForUpdates = function(){
-	var updateQuery = {
-		tags : query.tags,
-		loadMetadata : true,
-		after : null,
-		before : null,
-		count : query.count,
-		sortBy : query.sortBy
-	};
-
-	if(query.sortBy=="desc" && currentMessages.length>0){
-		//this becomes complicated due to loading many pages server side before querying the next one
-		updateQuery.sortBy = "asc";
-		updateQuery.after = currentMessages[0].message.id;
-		if(pendingUpdates.length>0){
-			updateQuery.after = pendingUpdates[pendingUpdates.length-1].message.id;
-		}
-	}else if(query.sortBy=="asc" && currentMessages.length>0){//totally untested block!
-		query.after = currentMessages[currentMessages.length-1].message.id;//what does this block mean?
-		if(pendingUpdates.length>0){
-			updateQuery.after = pendingUpdates[pendingUpdates.length-1].message.id;
-		}
-	}
-	ui.api.tagSearchThread(updateQuery, updateMessages);
+	ui.checkForUpdates(updateMessages);
 };
 
 var stopPolling = function(){
@@ -232,25 +203,101 @@ var stopPolling = function(){
 	clearTimeout(updateTimer);
 };
 
-
-var stringToTagsByDelim = function(str, delim){
-	var allTags = str.split(delim);
-	var tagArray = [];
-	for(var i=0; i<allTags.length;i++){
-		var tag = allTags[i].trim();
-		if(tag.length>0){
-			tagArray.push(tag);
+var addMessageUpdate = function(){
+	var addedThisBatch = 0;
+	while(pendingUpdates.length>0 && addedThisBatch < ui.settings.updateBatchSize){
+		var aMessage = pendingUpdates.shift();
+		console.log("Adding " + aMessage.message.id);
+		if(!ui.id2messages[aMessage.message.id]){
+			addedThisBatch++;
+			ui.totalMessages++;
+			ui.id2messages[aMessage.message.id] = aMessage;
+			ui.currentMessages.unshift(aMessage);
+			var appliedTemplate = $(tmplBasicDocument(aMessage));
+			var newMessage = null;
+			if(ui.query.sortBy=="desc"){
+				newMessage = $("#content").prepend(appliedTemplate);
+			}else{
+				newMessage = $("#content").append(appliedTemplate);
+			}
+			wireMessageSummary(aMessage, appliedTemplate);
 		}
 	}
-	return tagArray;
+	var thisManyTooMany = ui.totalMessages - messageResetCount;
+	for(var i=0; i<thisManyTooMany;i++){
+		var staleMessage = ui.currentMessages.pop();
+		var messageSelector = ".categorizeus"+staleMessage.message.id;
+		ui.totalMessages--;
+		$(messageSelector).remove();
+	}
+	var messagesInFrame = $(".basicDocument").length;
+
+	console.log("Total in grid " + messagesInFrame + "Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
+	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
+};
+var updateMessages = function(err, messages){
+	var s = "";
+	for(var i = 0; i<messages.length; i++){
+		var aMessage = messages[i];
+		s = s + aMessage.message.id+",";
+		pendingUpdates.push(aMessage);
+		//TODO dupes in here somehow?
+		//debugger;
+		/*if(currentMessages.length==0 ||
+			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
+			pendingUpdates.push(aMessage);//TODO dupes in here somehow?
+		}*/
+	}
+	console.log("Add these " + s);
 }
 
-var stringToTags = function(str){
-	var spaceTags = stringToTagsByDelim(str, " ");
-	var commaTags = stringToTagsByDelim(str, ",");
-	if(spaceTags.length>commaTags.length) return spaceTags;
-	return commaTags;
-}
+
+var displayMessages = function(err, messages){
+	$("#content").empty();
+	for(let aMessage of messages){
+		var appliedTemplate = $(ui.tmpl("tmplBasicDocument",aMessage));
+		var newMessage = $("#content").append(appliedTemplate);
+		wireMessageSummary(aMessage, appliedTemplate);
+	}
+	$("#content").append($(tmplNavigation({})));
+	$("#content").find(".nextLink").click(function(event){
+		ui.nextPage(displayMessages);
+	});
+	$("#content").find(".previousLink").click(function(event){
+		ui.previousPage(displayMessages);
+	});
+};
+
+var wireMessageSummary = function(aMessage, appliedTemplate){
+	appliedTemplate.bind('click',
+	   (function(template, message){
+					return function(event){
+					      handleGridDocumentClick(event, template, message);
+					}
+	   })(appliedTemplate, aMessage)
+	);
+
+	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
+	var newMessageView = $("#content").find(qry);
+	appliedTemplate.hover(function(){
+			if(tagSelectMode){
+				appliedTemplate.addClass("candidate");
+			}
+		}, function(){
+			appliedTemplate.removeClass("candidate");
+	});
+	newMessageView.find(".viewButton").click((function(message){
+		return function(event){
+			console.log("View button is clicked for " + message.message.id);
+			ui.api.loadMessage(message.message.id, function(error, messageThread){
+				console.log(messageThread);
+				displayMessageThread(message, messageThread);
+			});
+		};
+	})(aMessage));
+};
+
+
 
 var tagSelectedMessages = function(tags){
 	var tagArray = stringToTags(tags);
@@ -324,150 +371,6 @@ var handleGridDocumentClick = function(event, template, message){
 	    console.log("You clicked an image, way to go");
       //event.preventDefault();
 	  }
-	}
-}
-var wireMessageSummary = function(aMessage, appliedTemplate){
-	appliedTemplate.bind('click',
-	   (function(template, message){
-					return function(event){
-					      handleGridDocumentClick(event, template, message);
-					}
-	   })(appliedTemplate, aMessage)
-	);
-
-
-
-	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
-	var newMessageView = $("#content").find(qry);
-	appliedTemplate.hover(function(){
-			if(tagSelectMode){
-				appliedTemplate.addClass("candidate");
-			}
-		}, function(){
-			appliedTemplate.removeClass("candidate");
-	});
-	newMessageView.find(".viewButton").click((function(message){
-		return function(event){
-			console.log("View button is clicked for " + message.message.id);
-			ui.api.loadMessage(message.message.id, function(error, messageThread){
-				console.log(messageThread);
-				displayMessageThread(message, messageThread);
-			});
-		};
-	})(aMessage));
-};
-
-var addMessageUpdate = function(){
-	var addedThisBatch = 0;
-
-	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
-		var aMessage = pendingUpdates.shift();
-		console.log("Adding " + aMessage.message.id);
-		if(!id2messages[aMessage.message.id]){
-			addedThisBatch++;
-			totalMessages++;
-			id2messages[aMessage.message.id] = aMessage;
-			currentMessages.unshift(aMessage);
-			var appliedTemplate = $(tmplBasicDocument(aMessage));
-			var newMessage = null;
-			if(query.sortBy=="desc"){
-				newMessage = $("#content").prepend(appliedTemplate);
-			}else{
-				newMessage = $("#content").append(appliedTemplate);
-			}
-			wireMessageSummary(aMessage, appliedTemplate);
-		}
-	}
-	var thisManyTooMany = totalMessages - messageResetCount;
-	for(var i=0; i<thisManyTooMany;i++){
-		var staleMessage = currentMessages.pop();
-		var messageSelector = ".categorizeus"+staleMessage.message.id;
-		totalMessages--;
-		$(messageSelector).remove();
-	}
-	var messagesInFrame = $(".basicDocument").length;
-
-	console.log("Total in grid " + messagesInFrame + "Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
-	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
-};
-
-var updateMessages = function(err, messages){
-	var s = "";
-	for(var i = 0; i<messages.length; i++){
-		var aMessage = messages[i];
-		s = s + aMessage.message.id+",";
-		pendingUpdates.push(aMessage);
-		//TODO dupes in here somehow?
-		//debugger;
-		/*if(currentMessages.length==0 ||
-			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
-			pendingUpdates.push(aMessage);//TODO dupes in here somehow?
-		}*/
-	}
-	console.log("Add these " + s);
-}
-
-var displayMessages = function(err, messages){
-	currentMessages = messages;
-	id2messages = {};
-	totalMessages = 0;
-	$("#content").empty();
-	if(messages.length!=0){
-		previousBounds.push(
-		{
-			from:messages[0].message.id,
-			to:messages[messages.length-1].message.id
-		}
-	);
-	}
-	for(var i=0; i<messages.length;i++){
-		totalMessages++;
-		var aMessage = messages[i];
-		id2messages[aMessage.message.id] = aMessage;
-		var appliedTemplate = $(tmplBasicDocument(aMessage));
-		var newMessage = $("#content").append(appliedTemplate);
-		wireMessageSummary(aMessage, appliedTemplate);
-	}
-	$("#content").append($(tmplNavigation({})));
-	$("#content").find(".nextLink").click(function(event){
-		nextPage(displayMessages);
-	});
-	$("#content").find(".previousLink").click(function(event){
-		previousPage(displayMessages);
-	});
-};
-
-var nextPage = function(cb){
-	if(query.sortBy=="asc"){
-		query.after = null;
-		if(currentMessages!=null && currentMessages.length>0){
-			query.after = currentMessages[currentMessages.length-1].message.id;
-		}
-		query.before = null;
-	}else if(query.sortBy=="desc"){
-		query.after = null;
-		query.before = null;
-		if(currentMessages!=null && currentMessages.length>0){
-			query.before = currentMessages[currentMessages.length-1].message.id;
-		}
-	}
-	console.log(JSON.stringify(previousBounds));
-	ui.api.tagSearchThread(query,cb);
-}
-var previousPage = function(cb){
-	if(previousBounds.length>1){
-		previousBounds.pop();
-		console.log(JSON.stringify(previousBounds));
-		var goalBounds = previousBounds.pop();//this is what the next one SHOULD be
-		query.after = null;
-		query.before = null;
-		if(previousBounds.length>0 && query.sortBy == "asc"){
-			query.after = previousBounds[previousBounds.length-1].to;
-		}
-		else if(previousBounds.length>0 && query.sortBy == "desc"){
-			query.before = previousBounds[previousBounds.length-1].to;
-		}
-		ui.api.tagSearchThread(query,cb);
 	}
 }
 
