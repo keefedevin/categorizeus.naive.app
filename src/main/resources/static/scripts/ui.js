@@ -2,6 +2,7 @@ class UI{
   constructor(templateSources){
     this.templateSources = templateSources;
     this.templates = {};
+    this.api = new CategorizeUs();
   }
   initialize(cb){
       this.loadTemplates(err =>{
@@ -9,7 +10,7 @@ class UI{
             console.log(err);
             return cb(err);
         }
-        fetchCurrentUser((err, user) =>{
+        this.api.fetchCurrentUser((err, user) =>{
           if(err) console.log(err);
           cb(err, user);//going to load some other stuff here
         });

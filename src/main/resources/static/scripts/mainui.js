@@ -63,7 +63,7 @@ var finishInitialize = function(dontDoInitialSearch){
 	$("#controlsPane").html(ui.templates["tmplControls"]({}));
 	displayUser(currentUser);
   if(!dontDoInitialSearch){
-  	tagSearchThread(query, displayMessages);
+  	ui.api.tagSearchThread(query, displayMessages);
   }
 	$('#signinButton').click(function() {
 		window.location.href = "/v1/auth/oauth/google";
@@ -73,7 +73,7 @@ var finishInitialize = function(dontDoInitialSearch){
 			console.log("Clicking Login Button");
 			displayLoginForm("#editor");
 		}else{
-			logoutUser(function(err, user){
+			ui.api.logoutUser(function(err, user){
 				if(err!=null){
 					$(".userGreeting").html("<h1> "+err+"</h1>");
 					return;
@@ -112,7 +112,7 @@ var finishInitialize = function(dontDoInitialSearch){
 			displayLoginForm("#editor");
 		}else{
 			displayEditForm("#editor", {}, function(){
-				tagSearchThread(query, displayMessages);
+				ui.api.tagSearchThread(query, displayMessages);
 			});
 		}
 	});
@@ -129,7 +129,7 @@ var finishInitialize = function(dontDoInitialSearch){
 		query.before = null;
 		query.after = null;
 		previousBounds = [];
-		tagSearchThread(query, displayMessages);
+		ui.api.tagSearchThread(query, displayMessages);
 	});
 
 	$("#btnTag").click(function(){
@@ -222,7 +222,7 @@ var checkForUpdates = function(){
 			updateQuery.after = pendingUpdates[pendingUpdates.length-1].message.id;
 		}
 	}
-	tagSearchThread(updateQuery, updateMessages);
+	ui.api.tagSearchThread(updateQuery, updateMessages);
 };
 
 var stopPolling = function(){
@@ -270,7 +270,7 @@ var tagSelectedMessages = function(tags){
 		$("#status").html("<h1>Please select messages when tagging</h1>");
 		return;
 	}
-	tagMessages(tagArray, whichTagged,function(err, message){
+	ui.api.tagMessages(tagArray, whichTagged,function(err, message){
 		    $('.basicDocument.selected').toggleClass('selected');
 		    $('.basicDocument.candidate').toggleClass('candidate');
 
@@ -313,11 +313,6 @@ var displayLoginForm = function(container){ //#TODO hey we are seeing a template
 	});
 }
 
-var displayRegisterForm = function(container){ //#TODO hey we are seeing a template pattern here, let's generalize it
-	var controls = $(container).html(tmplRegister({}));
-	controls.find(".btnRegister").click(dynamicRegister(controls));
-}
-
 var handleGridDocumentClick = function(event, template, message){
 	if(tagSelectMode ){
     //&& event.target.tagName != "IMG" && event.target.tagName != "INPUT"
@@ -354,7 +349,7 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 	newMessageView.find(".viewButton").click((function(message){
 		return function(event){
 			console.log("View button is clicked for " + message.message.id);
-			loadMessage(message.message.id, function(error, messageThread){
+			ui.api.loadMessage(message.message.id, function(error, messageThread){
 				console.log(messageThread);
 				displayMessageThread(message, messageThread);
 			});
@@ -457,7 +452,7 @@ var nextPage = function(cb){
 		}
 	}
 	console.log(JSON.stringify(previousBounds));
-	tagSearchThread(query,cb);
+	ui.api.tagSearchThread(query,cb);
 }
 var previousPage = function(cb){
 	if(previousBounds.length>1){
@@ -472,21 +467,21 @@ var previousPage = function(cb){
 		else if(previousBounds.length>0 && query.sortBy == "desc"){
 			query.before = previousBounds[previousBounds.length-1].to;
 		}
-		tagSearchThread(query,cb);
+		ui.api.tagSearchThread(query,cb);
 	}
 }
 
 var displayMessageThread = function(message, thread){
 	$("#content").empty();
 	currentMessage = message;
-	updateAttachmentLinks(message);
+	ui.api.updateAttachmentLinks(message);
 	var id2message = {};
 	id2message[message.message.id] =  message;
 	for(var msg of thread){
 		id2message[msg.message.id] = msg;
 	}
 	for(var msg of thread){
-		updateAttachmentLinks(msg);
+		ui.api.updateAttachmentLinks(msg);
 		if(!id2message[msg.message.repliesTo].children){
 			id2message[msg.message.repliesTo].children = [];
 		}
@@ -515,14 +510,14 @@ var addComment = function(message, depth){
 	var newMessageView = $("#content").find(".categorizeus"+message.message.id);
 	newMessageView.find(".closeButton").click((function(message, messageView){
 			return function(event){//TODO this is completely wrong, review!
-				tagSearchThread(query, displayMessages);
+				ui.api.tagSearchThread(query, displayMessages);
 			};
 	})(message, newMessageView));
 	newMessageView.find(".replyButton").click((function(message, messageView){
 			return function(event){
 				console.log("Reply to " + message.message.id);
 				displayEditForm("#editor", {}, function(){
-					loadMessage(currentMessage.message.id, function(error, messageThread){
+					ui.api.loadMessage(currentMessage.message.id, function(error, messageThread){
 						console.log(messageThread);
 						displayMessageThread(currentMessage, messageThread);
 					});
@@ -535,7 +530,7 @@ var dynamicLogin = function(el){
 	return function(){
 		var username = el.find(".txtUsername").val();
 		var password = el.find(".txtPassword").val();
-		loginUser(username, password, function(err, user){
+		ui.api.loginUser(username, password, function(err, user){
 			if(err!=null){
 				$(".userGreeting").html("<h1>"+err+"</h1>");
 			}else{//TODO merge with the logout, get current user stuff
@@ -589,10 +584,10 @@ var dynamicEditSubmit = function(el, cb){
 			if(file.val()!==''){//file[0].files.length?
 				console.log("Found an attached file");
 				console.log(file[0].files);
-				createMessageWithAttachment(newMessage, file[0].files, handleCreatedMessage);
+				ui.api.createMessageWithAttachment(newMessage, file[0].files, handleCreatedMessage);
 				return;
 			}
-			createMessage(newMessage, handleCreatedMessage);
+			ui.api.createMessage(newMessage, handleCreatedMessage);
 
 		}else{
 			$("#status").append("<p>Currently, editing existing docs not supported. Clear and try again.</p>");
