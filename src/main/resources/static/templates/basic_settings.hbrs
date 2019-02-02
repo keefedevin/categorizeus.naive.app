@@ -1,9 +1,7 @@
-<script id="tmplSettings" type="text/x-handlebars-template">
-  <div class="settings">
-    <p>Poll Rate <input class="txtPollRate" type="text" value="{{pollRate}}"/></p>
-    <p>Update Batch Size<input class="txtUpdateBatchSize" type="text" value="{{updateBatchSize}}"/></p>
-    <p>UI Update Rate<input class="txtUpdateRate" type="text" value="{{uiUpdateRate}}"/></p>
-    <input type="button" class="btnSaveSettings" value="save"/>
-    <input type="button" class="closeButton" value="close"/>
-  </div>
-</script>
+<div class="settings">
+  <p>Poll Rate <input class="txtPollRate" type="text" value="{{pollRate}}"/></p>
+  <p>Update Batch Size<input class="txtUpdateBatchSize" type="text" value="{{updateBatchSize}}"/></p>
+  <p>UI Update Rate<input class="txtUpdateRate" type="text" value="{{uiUpdateRate}}"/></p>
+  <input type="button" class="btnSaveSettings" value="save"/>
+  <input type="button" class="closeButton" value="close"/>
+</div>

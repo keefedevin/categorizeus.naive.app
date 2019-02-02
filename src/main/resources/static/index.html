@@ -6,6 +6,7 @@
 	<script type="text/javascript" src="scripts/categorizeus.js"></script>
 	<script type="text/javascript" src="scripts/mousetrap.min.js"></script>
 	<script type="text/javascript" src="scripts/mainui.js"></script>
+  <script type="text/javascript" src="scripts/ui.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/mainui.css"></script>
   <script type="text/javascript">
     $(document).ready(function(){
@@ -15,25 +16,8 @@
 
   <body>
     <!-- The menu bar at the top of the screen -->
-    <div class="header">
-      <div class="mainNavItems">
-      	<div id="btnCategorizeUs" class="navItem categorizeUsButton">categorize.us</div>
-        <input id="txtTagSearch" class="tagText" type="text" placeholder="Tags to Search or Click Tag to Change Mode" width=200/>
-      	<span id="tagShortcut" class="taggingStuff unseen">[1]</span>
-      	<div id="btnSearch" class="navItem searchButton">Search</div>
-      	<div id="btnPlay" class="navItem playButton">&nbsp;</div>
-      	<div id="btnTag" class="navItem tagButton">Tag Mode</div>
-      	<div id="btnAddTag" class="navItem addTagButton taggingStuff unseen">&nbsp;</div>
-		<span id="tagPresets" class="taggingStuff unseen"></span>
-      </div>
-      <div class="personalNavItems">
-      	<div id="btnPost" class="navItem postButton">Post</div>
-        <div class="userInfo">
-        	<div class="userGreeting"></div>
-       		<input id="btnShowLogin" type="button" value="login"/>
-			<button id="signinButton">Sign in with Google</button>
-       	</div>
-      </div>
+    <div id="controlsPane" class="header">
+
     </div>
 
     <!-- This is the flexbox section for the overall navigation on the site -->
@@ -49,21 +33,7 @@
         <div  id="status">
         </div>
       </div>
-      <div class="aside unseen">
-      	icons courtesy https://thenounproject.com<br/>
-      	Specific Icon Credits:<br/>
-      	enso by Bluetip Design<br/>
-      	search by Bernar Novalyi<br/>
-      	tag by Bryn Taylor<br/>
-      	camera by Arthur Shlain<br/>
-      	thumbs by Justin Blake<br/>
-      	envelope by David Nesbitt<br/>
-      	about by Umesh Vgl<br/>
-      	edit by abhishek rana <br/>
-      	play by hayatstudio10 <br/>
-      	Stop by Jake Dunham <br/>
-      	Plus by creative outlet <br/>
-      </div>
+
     </div>
   </body>
 </html>

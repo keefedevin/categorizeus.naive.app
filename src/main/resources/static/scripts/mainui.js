@@ -6,7 +6,6 @@ var tmplIndividualComment;
 var tmplNavigation;
 var tmplSettings;
 
-
 var currentUser = null;
 var tagSelectMode = false;
 var currentThread;
@@ -34,53 +33,41 @@ var query = {
 	sortBy : "desc"
 };
 var previousBounds = [];
-var allTemplates = {};
+var templates = {};
+var ui;
+
 var initialize = function(dontDoInitialSearch){
-	var templates = [
+	var templateSources = [
 			{name:"tmplBasicDocument", url:"/templates/basic_doc.hbrs"},
 			{name:"tmplBasicDocumentEdit", url:"/templates/basic_doc_edit.hbrs"},
 			{name:"tmplLogin", url:"/templates/login.hbrs"},
 			{name:"tmplIndividualComment", url:"/templates/individual_comment.hbrs"},
 			{name:"tmplNavigation", url:"/templates/basic_navigation.hbrs"},
-			{name:"tmplSettings", url:"/templates/basic_settings.hbrs"}
+			{name:"tmplSettings", url:"/templates/basic_settings.hbrs"},
+			{name:"tmplControls", url:"/templates/basic_controls.hbrs"}
 	];
-
-	async.each(templates, function(tmpl, cb){
-		$.get(tmpl.url, function(data){
-			allTemplates[tmpl.name] = Handlebars.compile(data);
-			cb();
-		});
-	}, function(err){
-		if(err) console.log(err);
-		finishInitialize(dontDoInitialSearch);
+	ui = new UI(templateSources);
+	ui.initialize(function(err, user){
+			currentUser = user;
+			finishInitialize(dontDoInitialSearch);
 	});
 }
 
 var finishInitialize = function(dontDoInitialSearch){
-	tmplBasicDocument = allTemplates["tmplBasicDocument"];
-	tmplBasicDocumentEdit = allTemplates["tmplBasicDocumentEdit"];//notice the pattern, probably put these in an object and generalize
-	tmplLogin = allTemplates["tmplLogin"]
-	tmplIndividualComment = allTemplates["tmplIndividualComment"]
-	tmplNavigation= allTemplates["tmplNavigation"]
-	tmplSettings= allTemplates["tmplSettings"]
-	fetchCurrentUser(function(err, user){
-		if(err!=null){
-			console.log("Nobody is logged in");
-			console.log(err);
-			return;
-		}
-		currentUser = user;
-		$("#btnShowLogin").prop("value", "logout");
-		$("#signinButton").hide();
-		console.log(user);
-		$(".userGreeting").html("Hi, "+user.username+"!");
-	});
-	  if(!dontDoInitialSearch){
-	  	tagSearchThread(query, displayMessages);
-	  }
+	tmplBasicDocument = ui.templates["tmplBasicDocument"];
+	tmplBasicDocumentEdit = ui.templates["tmplBasicDocumentEdit"];//notice the pattern, probably put these in an object and generalize
+	tmplLogin = ui.templates["tmplLogin"];
+	tmplIndividualComment = ui.templates["tmplIndividualComment"];
+	tmplNavigation= ui.templates["tmplNavigation"];
+	tmplSettings= ui.templates["tmplSettings"];
+	$("#controlsPane").html(ui.templates["tmplControls"]({}));
+	displayUser(currentUser);
+  if(!dontDoInitialSearch){
+  	tagSearchThread(query, displayMessages);
+  }
 	$('#signinButton').click(function() {
 		window.location.href = "/v1/auth/oauth/google";
-  	});
+	});
 	$("#btnShowLogin").click(function(){
 		if(currentUser==null){
 			console.log("Clicking Login Button");
@@ -99,7 +86,10 @@ var finishInitialize = function(dontDoInitialSearch){
 		}
 	});
 	$("#btnCategorizeUs").click(function(){
-		var controls = $("#editor").html(tmplSettings(settings));
+		console.log("in button click");
+		var settingHtml = tmplSettings(settings);
+		console.log(settingHtml);
+		var controls = $("#editor").html(settingHtml);
 		controls.find(".btnSaveSettings").click(function(){
 			var pollRate = parseInt(controls.find(".txtPollRate").val());
 			console.log("Poll Rate Read as " + pollRate);
@@ -201,7 +191,14 @@ var startPolling = function(){
 	}, settings.pollRate);
 	addMessageUpdate();
 };
-
+var displayUser = function(user){
+	if(user!=null){
+			$("#btnShowLogin").prop("value", "logout");
+			$("#signinButton").hide();
+			console.log(user);
+			$(".userGreeting").html("Hi, "+user.username+"!");
+	}
+}
 var checkForUpdates = function(){
 	var updateQuery = {
 		tags : query.tags,
