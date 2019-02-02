@@ -62,15 +62,15 @@ class UI{
   nextPage(cb){
     if(this.query.sortBy=="asc"){
       this.query.after = null;
-      if(this.this.currentMessages.length>0){
-        this.query.after = this.this.currentMessages[this.this.currentMessages.length-1].message.id;
+      if(this.currentMessages.length>0){
+        this.query.after = this.currentMessages[this.currentMessages.length-1].message.id;
       }
       this.query.before = null;
     }else if(this.query.sortBy=="desc"){
       this.query.after = null;
       this.query.before = null;
-      if(this.this.currentMessages.length>0){
-        this.query.before = this.this.currentMessages[this.this.currentMessages.length-1].message.id;
+      if(this.currentMessages.length>0){
+        this.query.before = this.currentMessages[this.currentMessages.length-1].message.id;
       }
     }
     this.searchByQuery(this.query, cb);

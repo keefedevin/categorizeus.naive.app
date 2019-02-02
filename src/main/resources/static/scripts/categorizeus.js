@@ -119,7 +119,7 @@ class CategorizeUs{
 		if(message.attachments){
 			for(var i=0; i<message.attachments.length;i++){
 				var attachment = message.attachments[i];
-				var attachmentLink = "files/" + attachment.id + attachment.extension;
+				var attachmentLink = "/files/" + attachment.id + attachment.extension;
 				//TODO ugh
 				if(attachment.filename.includes("small")){
 					message.thumbnailLink = attachmentLink;
