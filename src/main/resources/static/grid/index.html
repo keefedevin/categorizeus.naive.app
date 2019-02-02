@@ -5,15 +5,27 @@
   <script type="text/javascript" src="/scripts/async.js"></script>
 	<script type="text/javascript" src="/scripts/categorizeus.js"></script>
 	<script type="text/javascript" src="/scripts/mousetrap.min.js"></script>
-	<script type="text/javascript" src="/scripts/mainui.js"></script>
+	<script type="text/javascript" src="/scripts/simpleui.js"></script>
+  <script type="text/javascript" src="/scripts/uiext.js"></script>
   <script type="text/javascript" src="/scripts/ui.js"></script>
   <script type="text/javascript" src="/scripts/util.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="/css/mainui.css"></script>
   <script type="text/javascript">
     $(document).ready(function(){
-		    initialize();
-    });
+      var templateSources = [
+          {name:"tmplBasicDocument", url:"/templates/basic_doc.hbrs"},
+          {name:"tmplBasicDocumentEdit", url:"/templates/basic_doc_edit.hbrs"},
+          {name:"tmplLogin", url:"/templates/login.hbrs"},
+          {name:"tmplIndividualComment", url:"/templates/individual_comment.hbrs"},
+          {name:"tmplNavigation", url:"/templates/basic_navigation.hbrs"},
+          {name:"tmplSettings", url:"/templates/basic_settings.hbrs"},
+          {name:"tmplControls", url:"/templates/basic_controls.hbrs"}
+      ];
+		  initialize(true, templateSources, function(err){
+        initializeExt();
+      });
+   });
   </script>
 
   <body>

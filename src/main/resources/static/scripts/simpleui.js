@@ -1,35 +1,19 @@
 var currentUser = null;
 var tagSelectMode = false;
-var currentThread;
-var poll = false;
-var pollInterval = null;
-var tagShortcuts = [];
-var pendingUpdates = [];
-var updateTimer;
-var messageResetCount = 100;
 var ui;
 
-var initialize = function(dontDoInitialSearch){
-	var templateSources = [
-			{name:"tmplBasicDocument", url:"/templates/basic_doc.hbrs"},
-			{name:"tmplBasicDocumentEdit", url:"/templates/basic_doc_edit.hbrs"},
-			{name:"tmplLogin", url:"/templates/login.hbrs"},
-			{name:"tmplIndividualComment", url:"/templates/individual_comment.hbrs"},
-			{name:"tmplNavigation", url:"/templates/basic_navigation.hbrs"},
-			{name:"tmplSettings", url:"/templates/basic_settings.hbrs"},
-			{name:"tmplControls", url:"/templates/basic_controls.hbrs"}
-	];
+var initialize = function(doInitialSearch, templateSources, cb){
 	ui = new UI(templateSources);
 	ui.initialize(function(err, user){
 			currentUser = user;
-			finishInitialize(dontDoInitialSearch);
+			finishInitialize(doInitialSearch, cb);
 	});
 }
 
-var finishInitialize = function(dontDoInitialSearch){
+var finishInitialize = function(doInitialSearch, cb){
 	$("#controlsPane").html(ui.tmpl("tmplControls",{}));
 	displayUser(currentUser);
-  if(!dontDoInitialSearch){
+  if(doInitialSearch){
   	ui.search([], displayMessages);
   }
 	$('#signinButton').click(function() {
@@ -52,26 +36,7 @@ var finishInitialize = function(dontDoInitialSearch){
 			});
 		}
 	});
-	$("#btnCategorizeUs").click(function(){
-		var settingHtml = ui.tmpl("tmplSettings",ui.settings);
-		var controls = $("#editor").html(settingHtml);
-		controls.find(".btnSaveSettings").click(function(){
-			var pollRate = parseInt(controls.find(".txtPollRate").val());
-			console.log("Poll Rate Read as " + pollRate);
-			ui.settings.pollRate = pollRate;
-			ui.settings.updateBatchSize =  parseInt(controls.find(".txtUpdateBatchSize").val());
-			ui.settings.uiUpdateRate =  parseInt(controls.find(".txtUpdateRate").val());
 
-			if(poll){
-				stopPolling();
-				startPolling();
-			}
-			controls.empty();
-		});
-		controls.find(".closeButton").click(function(){
-			controls.empty();
-		});
-	});
 	$("#btnPost").click(function(){
 		if(currentUser==null){
 			displayLoginForm("#editor");
@@ -95,62 +60,22 @@ var finishInitialize = function(dontDoInitialSearch){
 
 	$("#btnTag").click(function(){
 	    tagSelectMode = !tagSelectMode;
-	    $(".taggingStuff").toggleClass("unseen");
 	    $("#btnTag").toggleClass('selected');
 	    $(".basicDocument").toggleClass('selectable');
 	    if(tagSelectMode){
 	      $("#btnSearch").html("Apply Tag");
-	      Mousetrap.bind("1", function(){
-  			var tags = $("#txtTagSearch").val();
-				tagSelectedMessages(tags);
-	    });
-	      /*
-  	      Mousetrap.bind(["command+shift+1","ctrl+shift+1"], function(){
-  			var tags = $("#txtTagSearch").val();
-			alert("remove tags " + tags);
-			//tagSelectedMessages(tags);
-	      });*/
 	    }else{
 	      $(".basicDocument").removeClass('selected');
-	      Mousetrap.unbind("1");
-	      for(var i=0; i<tagShortcuts.length;i++){
-	      	Mousetrap.unbind((i+2)+"");
-	      }
-	      tagShortcuts = [];
 	      $("#tagPresets").empty();
 	      $("#btnSearch").html("Search");
 	    }
     	return;
 	});
-	$("#btnAddTag").click(function(){
-		var tags = $("#txtTagSearch").val();
-		var which = tagShortcuts.length+2;
-		tagShortcuts.push(tags);
-		$("#tagPresets").append("["+which+"]"+tags+"&nbsp;");
-		Mousetrap.bind(""+which, (function(tags){
-			return function(){
-				tagSelectedMessages(tags);
-			}
-		})(tags));
-	});
-
-	$("#btnPlay").click(function(){
-		poll = !poll;
-		if(poll){
-			startPolling();
-		}else {
-			stopPolling();
-		}
-	});
+	if(cb){
+		cb();
+	}
 }
-var startPolling = function(){
-	$("#btnPlay").removeClass("playButton");
-	$("#btnPlay").addClass("stopButton");
-	pollInterval = setInterval(function(){
-		checkForUpdates();
-	}, settings.pollRate);
-	addMessageUpdate();
-};
+
 var displayUser = function(user){
 	if(user!=null){
 			$("#btnShowLogin").prop("value", "logout");
@@ -159,66 +84,6 @@ var displayUser = function(user){
 			$(".userGreeting").html("Hi, "+user.username+"!");
 	}
 }
-var checkForUpdates = function(){
-	ui.checkForUpdates(updateMessages);
-};
-
-var stopPolling = function(){
-	$("#btnPlay").removeClass("stopButton");
-	$("#btnPlay").addClass("playButton");
-	clearInterval(pollInterval);
-	clearTimeout(updateTimer);
-};
-
-var addMessageUpdate = function(){
-	var addedThisBatch = 0;
-	while(pendingUpdates.length>0 && addedThisBatch < ui.settings.updateBatchSize){
-		var aMessage = pendingUpdates.shift();
-		console.log("Adding " + aMessage.message.id);
-		if(!ui.id2messages[aMessage.message.id]){
-			addedThisBatch++;
-			ui.totalMessages++;
-			ui.id2messages[aMessage.message.id] = aMessage;
-			ui.currentMessages.unshift(aMessage);
-			var appliedTemplate = $(ui.tmpl("tmplBasicDocument",aMessage));
-			var newMessage = null;
-			if(ui.query.sortBy=="desc"){
-				newMessage = $("#content").prepend(appliedTemplate);
-			}else{
-				newMessage = $("#content").append(appliedTemplate);
-			}
-			wireMessageSummary(aMessage, appliedTemplate);
-		}
-	}
-	var thisManyTooMany = ui.totalMessages - messageResetCount;
-	for(var i=0; i<thisManyTooMany;i++){
-		var staleMessage = ui.currentMessages.pop();
-		var messageSelector = ".categorizeus"+staleMessage.message.id;
-		ui.totalMessages--;
-		$(messageSelector).remove();
-	}
-	var messagesInFrame = $(".basicDocument").length;
-
-	console.log("Total in grid " + messagesInFrame + "Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
-	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
-};
-var updateMessages = function(err, messages){
-	var s = "";
-	for(var i = 0; i<messages.length; i++){
-		var aMessage = messages[i];
-		s = s + aMessage.message.id+",";
-		pendingUpdates.push(aMessage);
-		//TODO dupes in here somehow?
-		//debugger;
-		/*if(currentMessages.length==0 ||
-			parseInt(aMessage.message.id) > parseInt(currentMessages[0].message.id)){
-			pendingUpdates.push(aMessage);//TODO dupes in here somehow?
-		}*/
-	}
-	console.log("Add these " + s);
-}
-
-
 var displayMessages = function(err, messages){
 	$("#content").empty();
 	for(let aMessage of messages){
@@ -263,9 +128,6 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 		};
 	})(aMessage));
 };
-
-
-
 var tagSelectedMessages = function(tags){
 	var tagArray = stringToTags(tags);
 	var whichTagged = [];
@@ -345,7 +207,7 @@ var displayMessageThread = function(message, thread){
 	$("#content").empty();
 	currentMessage = message;
 	ui.api.updateAttachmentLinks(message);
-	var id2message = {};
+	var id2message = {};//TODO get into that method in ui
 	id2message[message.message.id] =  message;
 	for(var msg of thread){
 		id2message[msg.message.id] = msg;
