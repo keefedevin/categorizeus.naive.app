@@ -1,0 +1,22 @@
+<div class="basicDocument categorizeus{{message.id}}" id="{{message.id}}">
+  <h1>{{message.title}}</h1>
+  <div class="tagHolder">
+    {{#each tags}}
+      {{this}}
+    {{/each}}
+  </div>
+    {{#if attachmentLink}}
+      <div class = "imageHolder">
+        <a href="{{attachmentLink}}" target="_blank">
+          <img class = "gridImage" src="{{thumbnailLink}}" height="200px"/>
+        </a>
+      </div>
+    {{/if}}
+  <div class="postedBy">
+    posted by {{postedBy.username}}
+    <input type="button" class="viewButton" value="view"/>
+  </div>
+  <div class="body">
+    {{message.body}}
+  </div>
+</div>

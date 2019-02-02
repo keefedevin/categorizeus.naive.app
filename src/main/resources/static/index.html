@@ -8,7 +8,7 @@
 	<link rel="stylesheet" type="text/css" href="css/mainui.css"></script>
   <script type="text/javascript">
     $(document).ready(function(){
-		initialize();      
+		    initialize();      
     });
   </script>
   <!-- This is the template for the items in the main grid view-->
@@ -17,7 +17,7 @@
 			<h1>{{message.title}}</h1>
 			<div class="tagHolder">
 				{{#each tags}}
-					{{this}} 
+					{{this}}
 				{{/each}}
 			</div>
 	      {{#if attachmentLink}}
@@ -60,7 +60,7 @@
 					<p>{{message.title}}</p>
 					<div class="tagHolder">
 						{{#each tags}}
-							{{this}} 
+							{{this}}
 						{{/each}}
 					</div>
 					<input type="button" class="replyButton" value="reply"/>

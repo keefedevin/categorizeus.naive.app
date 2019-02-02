@@ -28,20 +28,25 @@ var settings = {
 var query = {
 	tags : [],
 	loadMetadata : true,
-	after : null, 
-	before : null, 
+	after : null,
+	before : null,
 	count : 20,
 	sortBy : "desc"
 };
 var previousBounds = [];
-
 var initialize = function(dontDoInitialSearch){
-	tmplBasicDocument = Handlebars.compile($("#tmplBasicDocument").html());
+	$.get("/templates/basic_doc.hbrs", function(data){
+		console.log(data);
+		tmplBasicDocument = Handlebars.compile(data);
+		finishInitialize(dontDoInitialSearch);
+	})
+}
+var finishInitialize = function(dontDoInitialSearch){
 	tmplBasicDocumentEdit = Handlebars.compile($("#tmplBasicDocumentEdit").html());//notice the pattern, probably put these in an object and generalize
 	tmplLogin = Handlebars.compile($("#tmplLogin").html());
 	tmplIndividualComment = Handlebars.compile($("#tmplIndividualComment").html());
 	tmplNavigation= Handlebars.compile($("#tmplNavigation").html());
-	tmplSettings= Handlebars.compile($("#tmplSettings").html()); 
+	tmplSettings= Handlebars.compile($("#tmplSettings").html());
 	fetchCurrentUser(function(err, user){
 		if(err!=null){
 			console.log("Nobody is logged in");
@@ -85,7 +90,7 @@ var initialize = function(dontDoInitialSearch){
 			settings.pollRate = pollRate;
 			settings.updateBatchSize =  parseInt(controls.find(".txtUpdateBatchSize").val());
 			settings.uiUpdateRate =  parseInt(controls.find(".txtUpdateRate").val());
-			
+
 			if(poll){
 				stopPolling();
 				startPolling();
@@ -131,13 +136,13 @@ var initialize = function(dontDoInitialSearch){
 	      $("#btnSearch").html("Apply Tag");
 	      Mousetrap.bind("1", function(){
   			var tags = $("#txtTagSearch").val();
-			tagSelectedMessages(tags);			
+			tagSelectedMessages(tags);
 	      });
 	      /*
   	      Mousetrap.bind(["command+shift+1","ctrl+shift+1"], function(){
   			var tags = $("#txtTagSearch").val();
 			alert("remove tags " + tags);
-			//tagSelectedMessages(tags);			
+			//tagSelectedMessages(tags);
 	      });*/
 	    }else{
 	      $(".basicDocument").removeClass('selected');
@@ -158,11 +163,11 @@ var initialize = function(dontDoInitialSearch){
 		$("#tagPresets").append("["+which+"]"+tags+"&nbsp;");
 		Mousetrap.bind(""+which, (function(tags){
 			return function(){
-				tagSelectedMessages(tags);			
+				tagSelectedMessages(tags);
 			}
 		})(tags));
 	});
-	
+
 	$("#btnPlay").click(function(){
 		poll = !poll;
 		if(poll){
@@ -185,8 +190,8 @@ var checkForUpdates = function(){
 	var updateQuery = {
 		tags : query.tags,
 		loadMetadata : true,
-		after : null, 
-		before : null, 
+		after : null,
+		before : null,
 		count : query.count,
 		sortBy : query.sortBy
 	};
@@ -209,7 +214,7 @@ var checkForUpdates = function(){
 
 var stopPolling = function(){
 	$("#btnPlay").removeClass("stopButton");
-	$("#btnPlay").addClass("playButton");	
+	$("#btnPlay").addClass("playButton");
 	clearInterval(pollInterval);
 	clearTimeout(updateTimer);
 };
@@ -255,13 +260,13 @@ var tagSelectedMessages = function(tags){
 	tagMessages(tagArray, whichTagged,function(err, message){
 		    $('.basicDocument.selected').toggleClass('selected');
 		    $('.basicDocument.candidate').toggleClass('candidate');
-		    
+
 			//tagSearchThread(lastTags, displayMessages);
 			for(var i=0; i<whichTagged.length;i++){
 				var aMessage = id2messages[whichTagged[i]];
 				for(var j=0; j<tagArray.length;j++){
 					if(!aMessage.tags.includes(tagArray[j])){
-						aMessage.tags.push(tagArray[j]);					
+						aMessage.tags.push(tagArray[j]);
 					}
 				}
 				var selector = ".categorizeus" + whichTagged[i];
@@ -321,17 +326,17 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 					}
 	   })(appliedTemplate, aMessage)
 	);
-	
 
-	
+
+
 	var qry = ".basicDocument.categorizeus"+aMessage.message.id;
 	var newMessageView = $("#content").find(qry);
 	appliedTemplate.hover(function(){
 			if(tagSelectMode){
-				appliedTemplate.addClass("candidate");			
+				appliedTemplate.addClass("candidate");
 			}
 		}, function(){
-			appliedTemplate.removeClass("candidate");	
+			appliedTemplate.removeClass("candidate");
 	});
 	newMessageView.find(".viewButton").click((function(message){
 		return function(event){
@@ -346,7 +351,7 @@ var wireMessageSummary = function(aMessage, appliedTemplate){
 
 var addMessageUpdate = function(){
 	var addedThisBatch = 0;
-	
+
 	while(pendingUpdates.length>0 && addedThisBatch < settings.updateBatchSize){
 		var aMessage = pendingUpdates.shift();
 		console.log("Adding " + aMessage.message.id);
@@ -362,7 +367,7 @@ var addMessageUpdate = function(){
 			}else{
 				newMessage = $("#content").append(appliedTemplate);
 			}
-			wireMessageSummary(aMessage, appliedTemplate);	
+			wireMessageSummary(aMessage, appliedTemplate);
 		}
 	}
 	var thisManyTooMany = totalMessages - messageResetCount;
@@ -373,7 +378,7 @@ var addMessageUpdate = function(){
 		$(messageSelector).remove();
 	}
 	var messagesInFrame = $(".basicDocument").length;
-	
+
 	console.log("Total in grid " + messagesInFrame + "Added this Batch " + addedThisBatch + " still pending " + pendingUpdates.length + " batch " + settings.updateBatchSize);
 	updateTimer = setTimeout(addMessageUpdate, settings.uiUpdateRate);
 };
