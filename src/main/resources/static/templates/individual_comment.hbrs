@@ -1,0 +1,27 @@
+<div class="comment categorizeus{{message.id}}">
+  <div class="comment-content">
+    <header>
+      <p>{{message.title}}</p>
+      <div class="tagHolder">
+        {{#each tags}}
+          {{this}}
+        {{/each}}
+      </div>
+      <input type="button" class="replyButton" value="reply"/>
+            <input type="button" class="closeButton" value="close"/>
+    </header>
+            {{#if attachmentLink}}
+          <div class = "imageHolder">
+            <a href="{{attachmentLink}}" target="_blank">
+              <img class = "gridImage" src="{{attachmentLink}}" height="600px"/>
+            </a>
+          </div>
+        {{/if}}
+    <div class="postedBy">
+      posted by {{postedBy.username}}
+    </div>
+    <div class="body">
+      {{message.body}}
+    </div>
+  </div>
+</div>

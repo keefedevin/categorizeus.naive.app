@@ -34,19 +34,35 @@ var query = {
 	sortBy : "desc"
 };
 var previousBounds = [];
+var allTemplates = {};
 var initialize = function(dontDoInitialSearch){
-	$.get("/templates/basic_doc.hbrs", function(data){
-		console.log(data);
-		tmplBasicDocument = Handlebars.compile(data);
+	var templates = [
+			{name:"tmplBasicDocument", url:"/templates/basic_doc.hbrs"},
+			{name:"tmplBasicDocumentEdit", url:"/templates/basic_doc_edit.hbrs"},
+			{name:"tmplLogin", url:"/templates/login.hbrs"},
+			{name:"tmplIndividualComment", url:"/templates/individual_comment.hbrs"},
+			{name:"tmplNavigation", url:"/templates/basic_navigation.hbrs"},
+			{name:"tmplSettings", url:"/templates/basic_settings.hbrs"}
+	];
+
+	async.each(templates, function(tmpl, cb){
+		$.get(tmpl.url, function(data){
+			allTemplates[tmpl.name] = Handlebars.compile(data);
+			cb();
+		});
+	}, function(err){
+		if(err) console.log(err);
 		finishInitialize(dontDoInitialSearch);
-	})
+	});
 }
+
 var finishInitialize = function(dontDoInitialSearch){
-	tmplBasicDocumentEdit = Handlebars.compile($("#tmplBasicDocumentEdit").html());//notice the pattern, probably put these in an object and generalize
-	tmplLogin = Handlebars.compile($("#tmplLogin").html());
-	tmplIndividualComment = Handlebars.compile($("#tmplIndividualComment").html());
-	tmplNavigation= Handlebars.compile($("#tmplNavigation").html());
-	tmplSettings= Handlebars.compile($("#tmplSettings").html());
+	tmplBasicDocument = allTemplates["tmplBasicDocument"];
+	tmplBasicDocumentEdit = allTemplates["tmplBasicDocumentEdit"];//notice the pattern, probably put these in an object and generalize
+	tmplLogin = allTemplates["tmplLogin"]
+	tmplIndividualComment = allTemplates["tmplIndividualComment"]
+	tmplNavigation= allTemplates["tmplNavigation"]
+	tmplSettings= allTemplates["tmplSettings"]
 	fetchCurrentUser(function(err, user){
 		if(err!=null){
 			console.log("Nobody is logged in");
