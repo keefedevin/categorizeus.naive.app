@@ -1,0 +1,29 @@
+<div class="mainNavItems">
+  <div id="btnCategorizeUs" class="navItem categorizeUsButton">categorize.us</div>
+  <input id="txtTagSearch" class="tagText" type="text" placeholder="Tags to Search or Click Tag to Change Mode" width="200"/>
+  <div id="btnSearch" class="navItem searchButton">Search</div>
+  <div id="btnTag" class="navItem tagButton">Tag Mode</div>
+</div>
+<div class="personalNavItems">
+  <div id="btnPost" class="navItem postButton">Post</div>
+  <div class="userInfo">
+    <div class="userGreeting"></div>
+    <input id="btnShowLogin" type="button" value="login"/>
+<button id="signinButton">Sign in with Google</button>
+  </div>
+</div>
+<div class="aside unseen">
+  icons courtesy https://thenounproject.com<br/>
+  Specific Icon Credits:<br/>
+  enso by Bluetip Design<br/>
+  search by Bernar Novalyi<br/>
+  tag by Bryn Taylor<br/>
+  camera by Arthur Shlain<br/>
+  thumbs by Justin Blake<br/>
+  envelope by David Nesbitt<br/>
+  about by Umesh Vgl<br/>
+  edit by abhishek rana <br/>
+  play by hayatstudio10 <br/>
+  Stop by Jake Dunham <br/>
+  Plus by creative outlet <br/>
+</div>
