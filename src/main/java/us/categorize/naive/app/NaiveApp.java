@@ -25,11 +25,11 @@ public class NaiveApp {
 		Config config = new Config(properties);
 		config.configureCategorizeUs();
 		
-		
+		/*
 		User user = new User();
 		user.setUsername("keefe");
-		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("35789fb6es")));
-		CategorizeUs.instance().getUserStore().registerUser(user);
+		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("35789fb6e")));
+		CategorizeUs.instance().getUserStore().registerUser(user);*/
 		
         Server server = new Server(config.getPort());
 

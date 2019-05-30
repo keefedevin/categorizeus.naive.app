@@ -3,9 +3,9 @@
   <input id="txtTagSearch" class="tagText" type="text" placeholder="Tags to Search or Click Tag to Change Mode" width="200"/>
   <span id="tagShortcut" class="taggingStuff unseen">[1]</span>
   <div id="btnSearch" class="navItem searchButton">Search</div>
-  <div id="btnPlay" class="navItem playButton">&nbsp;</div>
+  <div id="btnPlay" class="navItem playButton"></div>
   <div id="btnTag" class="navItem tagButton">Tag Mode</div>
-  <div id="btnAddTag" class="navItem addTagButton taggingStuff unseen">&nbsp;</div>
+  <div id="btnAddTag" class="navItem addTagButton taggingStuff unseen"></div>
 <span id="tagPresets" class="taggingStuff unseen"></span>
 </div>
 <div class="personalNavItems">
