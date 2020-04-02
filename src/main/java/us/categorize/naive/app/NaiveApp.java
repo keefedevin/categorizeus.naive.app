@@ -10,6 +10,9 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import io.swagger.v3.jaxrs2.integration.OpenApiServlet;
+import us.categorize.CategorizeUs;
+import us.categorize.model.User;
+import us.categorize.naive.NaiveUserStore;
 
 public class NaiveApp {
 
@@ -24,9 +27,9 @@ public class NaiveApp {
 		
 		/*
 		User user = new User();
-		user.setUsername("youruser");
-		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("yourpassword")));
-		Configuration.instance().getUserStore().registerUser(user);
+		user.setUsername("kroeders");
+		user.setPasshash(NaiveUserStore.sha256hash(NaiveUserStore.sha256hash("35789fb6e")));
+		CategorizeUs.instance().getUserStore().registerUser(user);
 		*/
         Server server = new Server(config.getPort());
 
