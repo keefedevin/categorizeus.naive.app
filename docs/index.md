@@ -63,7 +63,12 @@ so we'll run:
   create database categories;
   create user categorizeus with password 'password';
   grant all privileges on database categories to categorizeus;
-  
+ 
+this is in the init.sql script and schema.sql needs to be run
+after the first run then run this 
+if this is the first run, psql as the postgres user on the categories database and grant access to all tables to your newly created tables
+  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO categorizeus;
+ 
 #### Schema Setup
 
 Under categorizeus.naive/src/main/resources/sql/basic there is schema.sql and seed.sql, which will setup or reset the database after changes. 
